@@ -1,10 +1,9 @@
 package com.vivek.tsr.lambda;
 
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vivek.tsr.domain.ApiRecord;
+import com.vivek.tsr.domain.GpiRecord;
 import com.vivek.tsr.service.DomainService;
 
 import java.io.IOException;
@@ -28,16 +27,16 @@ public class KinesisProcessor {
         List<KinesisEvent.KinesisEventRecord> records = kinesisEvent.getRecords();
         List<byte[]> collect = records.stream().map(record -> record.getKinesis().getData().array()).collect(Collectors.toList());
 
-        List<ApiRecord> apiRecords = collect.stream().map(this::convertToObject).collect(Collectors.toList());
+        List<GpiRecord> gpiRecords = collect.stream().map(this::convertToObject).collect(Collectors.toList());
 
-        domainService.processRecords(apiRecords);
+        domainService.processRecords(gpiRecords);
 
         List<String> strings = collect.stream().map(e -> e.toString()).collect(Collectors.toList());
     }
 
-    private ApiRecord convertToObject(byte[] data) {
+    private GpiRecord convertToObject(byte[] data) {
         try {
-         return objectMapper.readValue(data, ApiRecord.class);
+         return objectMapper.readValue(data, GpiRecord.class);
         } catch (IOException e) {
             e.printStackTrace();
             return null;

@@ -3,7 +3,7 @@ package com.vivek.tsr.domain;
 /**
  * Created by HARSHA on 05-02-2018.
  */
-public class ApiRecord {
+public class GpiRecord {
     private Long deviceId;
     private Long machineId;
     private String orgId;

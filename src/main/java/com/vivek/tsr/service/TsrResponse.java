@@ -5,11 +5,11 @@ import com.vivek.tsr.domain.TSRRequest;
 /**
  * Created by HARSHA on 07-02-2018.
  */
-public class DsrResponse {
+public class TsrResponse {
 
     private DsrService dsrService;
 
-    public DsrResponse(DsrService dsrService) {
+    public TsrResponse(DsrService dsrService) {
         this.dsrService = dsrService;
     }
 

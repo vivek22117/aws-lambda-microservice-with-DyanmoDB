@@ -1,7 +1,7 @@
 package com.vivek.tsr.service;
 
         import com.fasterxml.jackson.databind.ObjectMapper;
-        import com.vivek.tsr.domain.ApiRecord;
+        import com.vivek.tsr.domain.GpiRecord;
 
         import java.io.IOException;
 
@@ -12,9 +12,9 @@ public class JsonUtility {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    public ApiRecord convertToObject(byte[] data) {
+    public GpiRecord convertToObject(byte[] data) {
         try {
-            return mapper.readValue(data, ApiRecord.class);
+            return mapper.readValue(data, GpiRecord.class);
         } catch (IOException e) {
             e.printStackTrace();
             return null;

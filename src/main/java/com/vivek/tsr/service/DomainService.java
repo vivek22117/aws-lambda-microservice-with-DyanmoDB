@@ -1,6 +1,6 @@
 package com.vivek.tsr.service;
 
-import com.vivek.tsr.domain.ApiRecord;
+import com.vivek.tsr.domain.GpiRecord;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import java.util.List;
 public class DomainService {
 
 
-    public void processRecords(List<ApiRecord> apiRecords) {
+    public void processRecords(List<GpiRecord> gpiRecords) {
 
     }
 }

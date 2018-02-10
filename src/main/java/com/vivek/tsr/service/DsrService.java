@@ -1,6 +1,6 @@
 package com.vivek.tsr.service;
 
-import com.vivek.tsr.domain.ApiRecord;
+import com.vivek.tsr.domain.GpiRecord;
 import com.vivek.tsr.domain.MyCompany;
 import com.vivek.tsr.domain.TSRRequest;
 import org.joda.time.DateTime;
@@ -19,16 +19,12 @@ public class DsrService {
         this.modelService = modelService;
     }
 
-    public List<ApiRecord> getHistoricApiRecords(TSRRequest tsrRequest) {
-        ApiRecord apiRecord = new ApiRecord();
-        tsrRequest.initialize(apiRecord.getEventTime());
+    public List<GpiRecord> getHistoricApiRecords(TSRRequest tsrRequest) {
+        GpiRecord gpiRecord = new GpiRecord();
+        tsrRequest.initialize(gpiRecord.getEventTime());
         List<MyCompany> myCompanies = createMyCompanies();
 
             modelService.getModelApiRecords(tsrRequest, myCompanies);
-
-
-
-
 
         return new ArrayList<>();
 
