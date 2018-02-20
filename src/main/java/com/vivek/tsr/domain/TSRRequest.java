@@ -13,25 +13,46 @@ public class TSRRequest {
    private Integer startIndex;
    private Long terminalId;
    private boolean lastKnown;
+   private String contentType;
 
-   public void initialize(String lastKnownTime) {
-       if(lastKnown) {
-           count = 1;
-       }
-       if(count == 0) {
-           count = 250;
-       }
-       if(startIndex == null) {
-           startIndex = 0;
-       }
-       if(endTime == null){
-           endTime = lastKnownTime;
-       }
-       if(startTime == null) {
-           startTime = Instant.parse(endTime).minus(100, ChronoUnit.MINUTES).toString();
-       }
+    public void initialize(String lastKnownTime) {
+        if(lastKnown) {
+            count = 1;
+        }
+        if(count == 0) {
+            count = 250;
+        }
+        if(startIndex == null) {
+            startIndex = 0;
+        }
+        if(endTime == null){
+            endTime = lastKnownTime;
+        }
+        if(startTime == null) {
+            startTime = Instant.parse(endTime).minus(100, ChronoUnit.MINUTES).toString();
+        }
 
-   }
+    }
+
+    public void setStartIndex(Integer startIndex) {
+        this.startIndex = startIndex;
+    }
+
+    public boolean isLastKnown() {
+        return lastKnown;
+    }
+
+    public void setLastKnown(boolean lastKnown) {
+        this.lastKnown = lastKnown;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
 
     public int getCount() {
         return count;

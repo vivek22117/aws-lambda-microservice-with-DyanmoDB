@@ -16,6 +16,11 @@ public class GPIHandler {
     private static final Logger LOGGER = LogManager.getLogger(GPIHandler.class);
 
     public GPIHandler() {
+        this(new TsrResponse());
+    }
+
+    public GPIHandler(TsrResponse tsrResponse) {
+        this.tsrResponse = tsrResponse;
     }
 
     public void processRequest(TSRRequest tsrRequest){

@@ -9,6 +9,9 @@ public class TsrResponse {
 
     private DsrService dsrService;
 
+    public TsrResponse() {
+    }
+
     public TsrResponse(DsrService dsrService) {
         this.dsrService = dsrService;
     }

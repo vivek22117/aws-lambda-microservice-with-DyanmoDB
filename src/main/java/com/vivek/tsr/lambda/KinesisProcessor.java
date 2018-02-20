@@ -27,14 +27,14 @@ public class KinesisProcessor {
         List<KinesisEvent.KinesisEventRecord> records = kinesisEvent.getRecords();
         List<byte[]> collect = records.stream().map(record -> record.getKinesis().getData().array()).collect(Collectors.toList());
 
-        List<GpiRecord> gpiRecords = collect.stream().map(this::convertToObject).collect(Collectors.toList());
+        List<String> stringList = collect.stream().map(e -> e.toString()).collect(Collectors.toList());
+        List<GpiRecord> gpiRecords = stringList.stream().map(this::convertToObject).collect(Collectors.toList());
 
         domainService.processRecords(gpiRecords);
 
-        List<String> strings = collect.stream().map(e -> e.toString()).collect(Collectors.toList());
     }
 
-    private GpiRecord convertToObject(byte[] data) {
+    private GpiRecord convertToObject(String data) {
         try {
          return objectMapper.readValue(data, GpiRecord.class);
         } catch (IOException e) {

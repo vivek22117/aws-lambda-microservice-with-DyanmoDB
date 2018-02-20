@@ -59,6 +59,7 @@ public class ModelService {
         if(CollectionUtils.isNullOrEmpty(collectedGpiRecords)){
             return null;
         }
+        executorService.shutdown();
         return collectedGpiRecords;
     }
 

@@ -2,6 +2,7 @@
 .idea/libraries/*.xml
 *.iml
 *.iws
+.idea/*
 
 
 
