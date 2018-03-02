@@ -5,8 +5,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vivek.tsr.domain.GpiRecord;
 import com.vivek.tsr.service.DomainService;
+import com.vivek.tsr.utility.JsonUtility;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,11 +19,17 @@ import java.util.stream.Collectors;
  */
 public class KinesisProcessor {
 
-    private ObjectMapper objectMapper;
+    private Logger logger = LogManager.getLogger(KinesisProcessor.class);
+    private JsonUtility jsonUtility;
     private DomainService domainService;
 
-    public KinesisProcessor(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    public KinesisProcessor() {
+        this(new JsonUtility(), new DomainService());
+    }
+
+    public KinesisProcessor(JsonUtility jsonUtility, DomainService domainService) {
+        this.jsonUtility = jsonUtility;
+        this.domainService = domainService;
     }
 
     public void processLastRequest(KinesisEvent kinesisEvent) {
@@ -36,11 +46,10 @@ public class KinesisProcessor {
 
     private GpiRecord convertToObject(String data) {
         try {
-         return objectMapper.readValue(data, GpiRecord.class);
+            return jsonUtility.convertFromJson(data,GpiRecord.class);
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            logger.error("Unable to process string to fetch GPI Record :", e);
         }
+        return null;
     }
-
 }

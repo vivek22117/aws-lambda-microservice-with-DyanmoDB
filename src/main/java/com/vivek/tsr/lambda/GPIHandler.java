@@ -25,6 +25,7 @@ public class GPIHandler {
 
     public void processRequest(TSRRequest tsrRequest){
         LOGGER.error("Process request has terminalId: " , tsrRequest.getTerminalId());
+
             tsrResponse.getDsrResponse(tsrRequest);
     }
 }

@@ -7,17 +7,22 @@ import com.vivek.tsr.domain.TSRRequest;
  */
 public class TsrResponse {
 
-    private DsrService dsrService;
+    private TsrHistoricDataService tsrHistoricDataService;
+    private TsrLastDataService tsrLastDataService;
 
     public TsrResponse() {
     }
 
-    public TsrResponse(DsrService dsrService) {
-        this.dsrService = dsrService;
+    public TsrResponse(TsrHistoricDataService tsrHistoricDataService, TsrLastDataService tsrLastDataService) {
+        this.tsrHistoricDataService = tsrHistoricDataService;
+        this.tsrLastDataService = tsrLastDataService;
     }
 
     public void getDsrResponse(TSRRequest tsrRequest) {
+        if(tsrRequest.isLastKnown()){
+            tsrLastDataService.getLastKnowGpiRecord(tsrRequest);
+        }
 
-        dsrService.getHistoricApiRecords(tsrRequest);
+        tsrHistoricDataService.getHistoricGpiRecords(tsrRequest);
     }
 }

@@ -14,24 +14,14 @@ public class TSRRequest {
    private Long terminalId;
    private boolean lastKnown;
    private String contentType;
+   private String threshold;
 
-    public void initialize(String lastKnownTime) {
-        if(lastKnown) {
-            count = 1;
-        }
-        if(count == 0) {
-            count = 250;
-        }
-        if(startIndex == null) {
-            startIndex = 0;
-        }
-        if(endTime == null){
-            endTime = lastKnownTime;
-        }
-        if(startTime == null) {
-            startTime = Instant.parse(endTime).minus(100, ChronoUnit.MINUTES).toString();
-        }
+    public String getThreshold() {
+        return threshold;
+    }
 
+    public void setThreshold(String threshold) {
+        this.threshold = threshold;
     }
 
     public void setStartIndex(Integer startIndex) {
@@ -92,5 +82,25 @@ public class TSRRequest {
 
     public void setTerminalId(Long terminalId) {
         this.terminalId = terminalId;
+    }
+
+    public void initialize(String lastKnownTime) {
+        if(lastKnown) {
+            count = 1;
+        }
+        if(count == 0) {
+            count = 250;
+        }
+        if(startIndex == null) {
+            startIndex = 0;
+        }
+        if(endTime == null){
+            endTime = lastKnownTime;
+        }
+        if(startTime == null) {
+            startTime = Instant.parse(endTime).minus(100, ChronoUnit.MINUTES).toString();
+        }
+        threshold = Instant.parse(endTime).minus(1, ChronoUnit.DAYS).toString();
+
     }
 }

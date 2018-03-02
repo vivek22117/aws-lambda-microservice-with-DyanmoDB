@@ -8,43 +8,68 @@ import org.joda.time.DateTime;
 
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.vivek.tsr.utility.PropertyLoader.getPropValues;
 import static java.lang.Long.parseLong;
 import static java.time.Instant.parse;
+import static java.util.stream.Collectors.*;
 
 /**
  * Created by HARSHA on 07-02-2018.
  */
-public class DsrService {
+public class TsrHistoricDataService {
     private static final String TIME_INTERVAL = "timeIntervalInMinutes";
     private static final long DEFAULT_TIME = 5;
     private ModelService modelService;
 
-    public DsrService(ModelService modelService) {
+    public TsrHistoricDataService(ModelService modelService) {
         this.modelService = modelService;
     }
 
-    public List<GpiRecord> getHistoricApiRecords(TSRRequest tsrRequest) {
+    public List<GpiRecord> getHistoricGpiRecords(TSRRequest tsrRequest) {
         List<GpiRecord> allGpiRecords = new ArrayList<>();
         GpiRecord gpiRecord = new GpiRecord();
         tsrRequest.initialize(gpiRecord.getEventTime());
         List<MyCompany> myCompanies = createMyCompanies();
-
+        int shortFall = 0;
         do {
             List<GpiRecord> modelApiRecords = modelService.getModelApiRecords(tsrRequest, myCompanies);
             allGpiRecords.addAll(modelApiRecords);
-            if (isApiRecordsValidateCountAndStartIndex(tsrRequest, allGpiRecords)) {
+            shortFall = getShortFall(tsrRequest, allGpiRecords);
+            if (shortFall == 0) {
+                List<GpiRecord> gpiRecordList = allGpiRecords.stream().skip(tsrRequest.getStartIndex())
+                        .limit(tsrRequest.getCount()).collect(toList());
+                tsrRequest.setStartIndex(0);
+                updateTime(tsrRequest);
                 break;
+            } else if (shortFall < 0) {
+                List<GpiRecord> gpiRecordList = allGpiRecords.stream().skip(tsrRequest.getStartIndex())
+                        .limit(tsrRequest.getCount()).collect(toList());
+                updateStartingIndex(tsrRequest, shortFall, modelApiRecords);
+                //60 + (-50) + 1 =11
+            } else if (Instant.parse(tsrRequest.getStartTime()).isBefore(Instant.parse(tsrRequest.getThreshold()))) {
+                updateStartingIndex(tsrRequest, shortFall, modelApiRecords);
+                updateTime(tsrRequest);
             }
             updateTime(tsrRequest);
-        } while (allGpiRecords.size() < (tsrRequest.getCount() + (tsrRequest.getStartIndex() > 0 ? tsrRequest.getStartIndex() : 0)));
+        } while (true);
 
         return new ArrayList<>();
+    }
 
+    private void updateStartingIndex(TSRRequest tsrRequest, int shortFall, List<GpiRecord> modelApiRecords) {
+        if (modelApiRecords.size() > tsrRequest.getCount()) {
+            tsrRequest.setStartIndex(modelApiRecords.size() + (shortFall - 1));
+        }
+    }
+
+    private int getShortFall(TSRRequest tsrRequest, List<GpiRecord> allGpiRecords) {
+        return tsrRequest.getCount() - (allGpiRecords.size() - (tsrRequest.getStartIndex() - 1));
     }
 
     private void updateTime(TSRRequest tsrRequest) {
@@ -75,5 +100,9 @@ public class DsrService {
         myCompany.setBeginTime(String.valueOf(Instant.now().minus(DEFAULT_TIME, ChronoUnit.DAYS)));
         myCompany.setActive(true);
         return myCompany;
+    }
+
+    public void getLastKnowGpiRecord(TSRRequest tsrRequest) {
+
     }
 }

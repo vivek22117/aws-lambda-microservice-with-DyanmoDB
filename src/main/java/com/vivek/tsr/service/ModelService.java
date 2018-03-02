@@ -5,12 +5,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.vivek.tsr.domain.GpiRecord;
 import com.vivek.tsr.domain.MyCompany;
 import com.vivek.tsr.domain.TSRRequest;
+import com.vivek.tsr.utility.JsonUtility;
 import com.vivek.tsr.utility.PropertyLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -18,12 +23,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.sort;
+import static org.apache.logging.log4j.LogManager.getLogger;
+
 /**
  * Created by HARSHA on 07-02-2018.
  */
 public class ModelService {
 
-    private static Logger logger = LogManager.getLogger(ModelService.class);
+    private static Logger logger;
 
     private static final String MY_MODEL_API = "myModelApi";
     private static final String MY_DATA_API = "myDataApi";
@@ -31,9 +39,16 @@ public class ModelService {
     private static final String DELIMITER = "&";
 
     private RestTemplate restTemplate;
+    private JsonUtility jsonUtility;
 
-    public ModelService(RestTemplate restTemplate) {
+    public ModelService() {
+        this(new RestTemplate(), new JsonUtility(), getLogger(ModelService.class));
+    }
+
+    public ModelService(RestTemplate restTemplate, JsonUtility jsonUtility, Logger logger) {
         this.restTemplate = restTemplate;
+        this.jsonUtility = jsonUtility;
+        this.logger = logger;
     }
 
     public List<GpiRecord> getModelApiRecords(TSRRequest tsrRequest, List<MyCompany> myCompanies) {
@@ -49,27 +64,31 @@ public class ModelService {
 
         List<GpiRecord> collectedGpiRecords = futureList.parallelStream().map(listFuture -> {
             try {
-                List<GpiRecord> gpiRecords = listFuture.get();
+                return listFuture.get();
             } catch (InterruptedException | ExecutionException ex) {
-                logger.error("Unable to get gpiRecords for future list: " , ex);
+                logger.error("Unable to get gpiRecords for future list: ", ex);
             }
             return new ArrayList<GpiRecord>();
         }).flatMap(List::stream).collect(Collectors.toList());
 
-        if(CollectionUtils.isNullOrEmpty(collectedGpiRecords)){
+        if (CollectionUtils.isNullOrEmpty(collectedGpiRecords)) {
             return null;
         }
         executorService.shutdown();
+        sort(collectedGpiRecords, Comparator.comparing(GpiRecord::getEventTime));
         return collectedGpiRecords;
     }
 
     private List<GpiRecord> getModelApiRecordFromMyModelService(Long terminalId, String myOrgId,
-                                                                String startTime, String endTime) {
+                                                                String startTime, String endTime) throws IOException {
+        List<GpiRecord> modelGpiRecord = new ArrayList<>();
         String url = buildMyModelServiceURLForTerminalData(terminalId, myOrgId, startTime, endTime);
 
-        String forObject = restTemplate.getForObject(url, String.class);
+        ResponseEntity<String> forEntity = restTemplate.getForEntity(url, String.class);
+        GpiRecord gpiRecord = new JsonUtility().convertFromJson(forEntity.getBody(), GpiRecord.class);
+        modelGpiRecord.add(gpiRecord);
 
-        return new ArrayList<>();
+        return modelGpiRecord;
     }
 
     private String buildMyModelServiceURLForTerminalData(Long terminalId, String myOrgId, String startTime, String endTime) {
