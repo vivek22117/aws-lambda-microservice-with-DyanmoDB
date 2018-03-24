@@ -1,6 +1,9 @@
 package com.vivek.tsr.service;
 
+import com.amazonaws.util.StringUtils;
 import com.vivek.tsr.domain.TSRRequest;
+
+import static com.amazonaws.util.StringUtils.isNullOrEmpty;
 
 /**
  * Created by HARSHA on 07-02-2018.
@@ -18,11 +21,14 @@ public class TsrResponse {
         this.tsrLastDataService = tsrLastDataService;
     }
 
-    public void getDsrResponse(TSRRequest tsrRequest) {
+    public TsrResponse getDsrResponse(TSRRequest tsrRequest) {
         if(tsrRequest.isLastKnown()){
-            tsrLastDataService.getLastKnowGpiRecord(tsrRequest);
+            return tsrLastDataService.getLastKnowGpiRecord(tsrRequest);
+        } if(isNullOrEmpty(tsrRequest.getStartTime()) && isNullOrEmpty(tsrRequest.getEndTime())){
+            return tsrHistoricDataService.getHistoricGpiRecordsFor24Hours(tsrRequest);
         }
 
-        tsrHistoricDataService.getHistoricGpiRecords(tsrRequest);
+        return null;
+//                tsrHistoricDataService.getHistoricGpiRecords(tsrRequest);
     }
 }

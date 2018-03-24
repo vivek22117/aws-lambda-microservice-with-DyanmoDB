@@ -4,6 +4,7 @@ package com.vivek.tsr.domain;
  * Created by HARSHA on 05-02-2018.
  */
 public class GpiRecord {
+    private String employeeId;
     private Long deviceId;
     private Long machineId;
     private String orgId;
@@ -11,6 +12,26 @@ public class GpiRecord {
     private String contentType;
     private String content;
     private String eventTime;
+    private String companyId;
+
+    public GpiRecord() {
+    }
+
+    public String getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(String employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public String getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(String companyId) {
+        this.companyId = companyId;
+    }
 
     public Long getDeviceId() {
         return deviceId;

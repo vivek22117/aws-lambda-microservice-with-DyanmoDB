@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-/**
- * Created by HARSHA on 09-02-2018.
- */
 public class PropertyLoader {
     String result = "";
 

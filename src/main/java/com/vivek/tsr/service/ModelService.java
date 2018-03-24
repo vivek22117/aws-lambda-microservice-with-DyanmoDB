@@ -13,21 +13,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.sort;
+import static java.util.stream.Collectors.toList;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 /**
- * Created by HARSHA on 07-02-2018.
+ * Created by Vivek Kumar Mishra on 07-02-2018.
  */
 public class ModelService {
 
@@ -51,32 +51,109 @@ public class ModelService {
         this.logger = logger;
     }
 
-    public List<GpiRecord> getModelApiRecords(TSRRequest tsrRequest, List<MyCompany> myCompanies) {
 
-        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
 
-        List<Future<List<GpiRecord>>> futureList = myCompanies.parallelStream()
+
+
+    public List<GpiRecord> getModelApiRecords(TSRRequest tsrRequest, List<String> timeIntervals) throws ExecutionException, InterruptedException {
+
+//        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
+        List<GpiRecord> allGpiRecords = new ArrayList<>();
+        ForkJoinPool pool = new ForkJoinPool(4);
+
+        System.out.println(timeIntervals);
+
+        List<GpiRecord> gpiRecords = pool.submit(() -> timeIntervals.parallelStream().map(interval -> {
+            try {
+                return getModelApiRecordFromMyModelService(tsrRequest.getTerminalId(), tsrRequest.getOrgId()
+                        , setStartTime(interval, tsrRequest), setEndTIme(interval, tsrRequest));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return new ArrayList<GpiRecord>();
+        }).flatMap(List::stream).collect(toList())).get();
+
+       /* pool.submit(()->timeIntervals.parallelStream().forEach(interval ->{
+            try {
+                allGpiRecords.addAll(getModelApiRecordFromMyModelService(tsrRequest.getTerminalId(),tsrRequest.getOrgId()
+                        ,setStartTime(interval,tsrRequest),setEndTIme(interval,tsrRequest)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        })).get();*/
+      /*  List<Future<List<GpiRecord>>> collect1 = myCompanies.parallelStream().map(myCompany -> executorService.submit(new Callable<List<GpiRecord>>() {
+            @Override
+            public List<GpiRecord> call() throws Exception {
+                return getModelApiRecordFromMyModelService(tsrRequest.getTerminalId(), myCompany.getMyOrgId(),
+                        tsrRequest.getStartTime(), tsrRequest.getEndTime());
+            }
+        })).collect(toList());*/
+
+
+//        timeIntervals.stream().map()
+
+
+       /* List<GpiRecord> collect1 = timeIntervals.parallelStream().map(t1 -> {
+            try {
+                return executorService.submit(new Callable<List<GpiRecord>>() {
+                    @Override
+                    public List<GpiRecord> call() throws Exception {
+                        tsrRequest.initialize(t1);
+                        return getModelApiRecordFromMyModelService(tsrRequest.getTerminalId(), tsrRequest.getOrgId(),
+                                tsrRequest.getStartTime(), tsrRequest.getEndTime());
+                    }
+                }).get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+            return new ArrayList<GpiRecord>();
+        }).flatMap(List::stream).collect(toList());*/
+
+//                .stream().map(Future::get);
+
+       /* collect.parallelStream()
+                .map(time -> executorService.submit(() ->
+                        getModelApiRecordFromMyModelService(tsrRequest.getTerminalId(), tsrRequest.getOrgId(),
+                                tsrRequest.getStartTime(), tsrRequest.getEndTime()))).collect(Collectors.toList());
+*/
+       /* List<Future<List<GpiRecord>>> futureList = myCompanies.parallelStream()
                 .filter(myCompany -> myCompany.isActive())
                 .map(myCompany -> executorService.submit(() ->
                         getModelApiRecordFromMyModelService(tsrRequest.getTerminalId(), myCompany.getMyOrgId(),
                                 tsrRequest.getStartTime(), tsrRequest.getEndTime()))).collect(Collectors.toList());
+*/
 
-
-        List<GpiRecord> collectedGpiRecords = futureList.parallelStream().map(listFuture -> {
+      /*  List<GpiRecord> collectedGpiRecords = futureList.parallelStream().map(listFuture -> {
             try {
                 return listFuture.get();
             } catch (InterruptedException | ExecutionException ex) {
                 logger.error("Unable to get gpiRecords for future list: ", ex);
             }
             return new ArrayList<GpiRecord>();
-        }).flatMap(List::stream).collect(Collectors.toList());
+        }).flatMap(List::stream).collect(Collectors.toList());*/
 
-        if (CollectionUtils.isNullOrEmpty(collectedGpiRecords)) {
+        if (CollectionUtils.isNullOrEmpty(allGpiRecords)) {
             return null;
         }
-        executorService.shutdown();
-        sort(collectedGpiRecords, Comparator.comparing(GpiRecord::getEventTime));
-        return collectedGpiRecords;
+        pool.shutdown();
+        sort(allGpiRecords, Comparator.comparing(GpiRecord::getEventTime));
+        return allGpiRecords;
+    }
+
+    /*private Function<String, List<GpiRecord>> fetchModelApiRecords(String interval, TSRRequest tsrRequest) throws IOException {
+        return interval -> {
+            getModelApiRecordFromMyModelService(tsrRequest.getTerminalId(),tsrRequest.getOrgId(),
+                    setStartTime(interval,tsrRequest),setEndTIme(interval,tsrRequest));
+        }
+    }*/
+
+    private String setEndTIme(String interval, TSRRequest tsrRequest) {
+        return "";
+    }
+
+    private String setStartTime(String interval, TSRRequest tsrRequest) {
+
+        return "";
     }
 
     private List<GpiRecord> getModelApiRecordFromMyModelService(Long terminalId, String myOrgId,
@@ -85,7 +162,7 @@ public class ModelService {
         String url = buildMyModelServiceURLForTerminalData(terminalId, myOrgId, startTime, endTime);
 
         ResponseEntity<String> forEntity = restTemplate.getForEntity(url, String.class);
-        GpiRecord gpiRecord = new JsonUtility().convertFromJson(forEntity.getBody(), GpiRecord.class);
+        GpiRecord gpiRecord = new JsonUtility().converCollectionFromJson(forEntity.getBody(), GpiRecord.class);
         modelGpiRecord.add(gpiRecord);
 
         return modelGpiRecord;
@@ -101,5 +178,24 @@ public class ModelService {
 
     private String getMyServiceApi() {
         return PropertyLoader.getPropValues(MY_MODEL_API);
+    }
+
+    private static TSRRequest getTsrReqest() {
+        TSRRequest tsrRequest = new TSRRequest();
+        tsrRequest.setCount(100);
+        tsrRequest.setStartIndex(0);
+        tsrRequest.setTerminalId(9049L);
+        tsrRequest.setContentType("application/json");
+        tsrRequest.setOrgId("10000");
+        tsrRequest.setStartTime("2018-01-21T01:01:01");
+        tsrRequest.setEndTime("2018-03-03T23:59:59");
+        return tsrRequest;
+    }
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        ModelService modelService = new ModelService();
+        List<String> timeIntervals = Arrays.asList("2018-01-21T00:00:00.000", "2018-01-21T12:00:00.000", "2018-01-20T00:00:00.000", "2018-01-20T12:00:00.000","2018-01-19T00:00:00.000", "2018-01-19T12:00:00.000");
+        TSRRequest tsrRequest = getTsrReqest();
+        modelService.getModelApiRecords(tsrRequest,timeIntervals);
     }
 }

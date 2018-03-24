@@ -40,7 +40,7 @@ public class DomainService {
                 .collect(Collectors.groupingBy(gpiRecord -> {
                     Long deviceId = gpiRecord.getDeviceId();
                     String orgId = gpiRecord.getOrgId();
-                    return new String(deviceId + "." + orgId);
+                    return new String(deviceId + "-" + orgId);
                 }, toList()));
 
         Map<String, GpiRecord> gpiRecordMap = mapOfGpiRecords.entrySet().stream()

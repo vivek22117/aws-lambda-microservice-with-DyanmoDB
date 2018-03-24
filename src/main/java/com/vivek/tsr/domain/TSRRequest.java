@@ -1,5 +1,7 @@
 package com.vivek.tsr.domain;
 
+import jdk.nashorn.internal.ir.IdentNode;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -7,22 +9,26 @@ import java.time.temporal.ChronoUnit;
  * Created by HARSHA on 30-01-2018.
  */
 public class TSRRequest {
-   private int count;
-   private String startTime;
-   private String endTime;
-   private Integer startIndex;
-   private Long terminalId;
-   private boolean lastKnown;
-   private String contentType;
-   private String threshold;
+    private Integer count;
+    private String startTime;
+    private String endTime;
+    private Integer startIndex;
+    private Long terminalId;
+    private boolean lastKnown;
 
-    public String getThreshold() {
-        return threshold;
+    private String orgId;
+
+    private String contentType;
+
+
+    public String getOrgId() {
+        return orgId;
     }
 
-    public void setThreshold(String threshold) {
-        this.threshold = threshold;
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
     }
+
 
     public void setStartIndex(Integer startIndex) {
         this.startIndex = startIndex;
@@ -44,11 +50,11 @@ public class TSRRequest {
         this.contentType = contentType;
     }
 
-    public int getCount() {
+    public Integer getCount() {
         return count;
     }
 
-    public void setCount(int count) {
+    public void setCount(Integer count) {
         this.count = count;
     }
 
@@ -84,23 +90,25 @@ public class TSRRequest {
         this.terminalId = terminalId;
     }
 
-    public void initialize(String lastKnownTime) {
-        if(lastKnown) {
+    public void initialize() {
+        if (lastKnown) {
             count = 1;
         }
-        if(count == 0) {
+        if (count == 0 && count != null) {
             count = 250;
         }
-        if(startIndex == null) {
+        if (startIndex == null) {
             startIndex = 0;
         }
-        if(endTime == null){
-            endTime = lastKnownTime;
+        if (endTime == null) {
         }
-        if(startTime == null) {
+        if (startTime == null) {
             startTime = Instant.parse(endTime).minus(100, ChronoUnit.MINUTES).toString();
         }
-        threshold = Instant.parse(endTime).minus(1, ChronoUnit.DAYS).toString();
+
+    }
+
+    public static void init(String lastTime) {
 
     }
 }

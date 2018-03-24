@@ -8,8 +8,8 @@ import com.vivek.tsr.domain.TSRRequest;
 public class TsrLastDataService {
 
 
-    public void getLastKnowGpiRecord(TSRRequest tsrRequest) {
+    public TsrResponse getLastKnowGpiRecord(TSRRequest tsrRequest) {
 
-
+        return null;
     }
 }
