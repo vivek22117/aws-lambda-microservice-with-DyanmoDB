@@ -1,9 +1,8 @@
 package com.vivek.tsr.entity;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import com.amazonaws.services.dynamodbv2.datamodeling.*;
+
+import java.util.List;
 
 /**
  * Created by Vivek Kumar Mishra on 24-03-2018.
@@ -23,6 +22,17 @@ public class LatestReportedRecord {
 
     @DynamoDBRangeKey(attributeName = "createdDate")
     private String createdDate;
+
+    @DynamoDBAttribute(attributeName = "timeIntervals")
+    private List<String> timeIntervals;
+
+    public List<String> getTimeIntervals() {
+        return timeIntervals;
+    }
+
+    public void setTimeIntervals(List<String> timeIntervals) {
+        this.timeIntervals = timeIntervals;
+    }
 
     public String getDeviceIdCompanyId() {
         return deviceIdCompanyId;

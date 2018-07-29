@@ -4,6 +4,13 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
+import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.document.utils.NameMap;
+import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
 import com.amazonaws.services.dynamodbv2.model.GetItemResult;
@@ -51,7 +58,6 @@ public class DynamoDBOperation {
         }
         return new GpiRecord();
     }
-
     private void extractGpiRecord(GetItemResult item) {
 
     }
@@ -67,16 +73,42 @@ public class DynamoDBOperation {
         return true;
     }
 
-    public List<String> getByTerminalAndOrgId(Long terminalId, String orgId, int i) {
-
-        return getDates(terminalId+"-"+orgId, DB_INDEX,i);
+    public boolean save(GpiRecord recordObject) {
+        mapper.save(recordObject);
+        return true;
     }
 
-    private List<String> getDates(String globalIndex, String dbIndex, int recordsCount) {
+    public void updateItem(LatestReportedRecord record) {
+
+        AmazonDynamoDB client = createClient();
+        DynamoDB dynamoDB = new DynamoDB(client);
+        Table table = dynamoDB.getTable(TABLE_NAME);
+
+        UpdateItemSpec itemSpec = new UpdateItemSpec();
+        itemSpec.withPrimaryKey("deviceIdOrgId", record.getDeviceIdCompanyId())
+                .withUpdateExpression("add #a :intervals set employeeId =:empId, comapanyId =:cID, createdDate =:date")
+                .withNameMap(new NameMap().with("#a", "timeIntervals"))
+                .withValueMap(new ValueMap().withList(":intervals", record.getTimeIntervals())
+                        .withString(":date", record.getCreatedDate()).withString(":empId", record.getEmployeeId())
+                        .withString(":compandyId", record.getCompanyId()));
+
+        UpdateItemOutcome updateItemOutcome = table.updateItem(itemSpec);
 
 
+    }
 
+    public List<String> getByTerminalAndOrgId(Long terminalId, String startDate, String endDate, String orgId, int i) {
 
+        return getDates(terminalId + "-" + orgId, startDate, endDate, DB_INDEX, i);
+    }
+
+    private List<String> getDates(String startDate, String endDate, String globalIndex, String dbIndex, int recordsCount) {
+
+        Map<String, AttributeValue> expressionAttribute = new HashMap<>();
+        expressionAttribute.put("deviceIdOrgId", new AttributeValue().withS(globalIndex));
+        expressionAttribute.put("employeeId", new AttributeValue().withS(dbIndex));
+        expressionAttribute.put("createdDate", new AttributeValue().withS(startDate));
+        expressionAttribute.put("createdDate", new AttributeValue().withS(endDate));
         return new ArrayList<String>();
     }
 }

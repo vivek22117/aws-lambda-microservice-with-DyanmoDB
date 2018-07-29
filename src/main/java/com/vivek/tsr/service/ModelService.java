@@ -22,6 +22,8 @@ import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.time.Instant.parse;
+import static java.util.Collections.enumeration;
 import static java.util.Collections.sort;
 import static java.util.stream.Collectors.toList;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -55,18 +57,16 @@ public class ModelService {
 
 
 
-    public List<GpiRecord> getModelApiRecords(TSRRequest tsrRequest, List<String> timeIntervals) throws ExecutionException, InterruptedException {
+    public List<GpiRecord> getModelApiRecords(TSRRequest tsrRequest, List<String> timeIntervalsInString) throws ExecutionException, InterruptedException {
 
 //        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
         List<GpiRecord> allGpiRecords = new ArrayList<>();
         ForkJoinPool pool = new ForkJoinPool(4);
 
-        System.out.println(timeIntervals);
-
-        List<GpiRecord> gpiRecords = pool.submit(() -> timeIntervals.parallelStream().map(interval -> {
+        pool.submit(() -> timeIntervalsInString.parallelStream().map(interval -> {
             try {
                 return getModelApiRecordFromMyModelService(tsrRequest.getTerminalId(), tsrRequest.getOrgId()
-                        , setStartTime(interval, tsrRequest), setEndTIme(interval, tsrRequest));
+                        , setStartTime(interval,tsrRequest), setEndTIme(interval,tsrRequest));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -148,12 +148,23 @@ public class ModelService {
     }*/
 
     private String setEndTIme(String interval, TSRRequest tsrRequest) {
-        return "";
+        String[] splitedIntervals = interval.split("=");
+        String endTime = splitedIntervals[0];
+        System.out.println(endTime);
+        if(parse(tsrRequest.getEndTime()).isAfter(parse(endTime))){
+            return endTime;
+        }
+        return tsrRequest.getEndTime();
     }
 
     private String setStartTime(String interval, TSRRequest tsrRequest) {
-
-        return "";
+        String[] splitedTimeIntervals = interval.split("=");
+        String startTime = splitedTimeIntervals[1];
+        System.out.println(startTime);
+        if(parse(startTime).isAfter(parse(tsrRequest.getStartTime()))){
+            return startTime;
+        }
+        return tsrRequest.getStartTime();
     }
 
     private List<GpiRecord> getModelApiRecordFromMyModelService(Long terminalId, String myOrgId,
@@ -161,6 +172,7 @@ public class ModelService {
         List<GpiRecord> modelGpiRecord = new ArrayList<>();
         String url = buildMyModelServiceURLForTerminalData(terminalId, myOrgId, startTime, endTime);
 
+        System.out.println(url);
         ResponseEntity<String> forEntity = restTemplate.getForEntity(url, String.class);
         GpiRecord gpiRecord = new JsonUtility().converCollectionFromJson(forEntity.getBody(), GpiRecord.class);
         modelGpiRecord.add(gpiRecord);
@@ -170,7 +182,7 @@ public class ModelService {
 
     private String buildMyModelServiceURLForTerminalData(Long terminalId, String myOrgId, String startTime, String endTime) {
 
-        return String.valueOf(new StringBuilder(getMyServiceApi()).append(MY_DATA_API).append(DATA_API)
+        return String.valueOf(new StringBuilder("http://my.vivek.com").append(MY_DATA_API).append(DATA_API)
                 .append("?").append("terminalId=").append(terminalId).append(DELIMITER)
                 .append("orgId=").append(myOrgId).append(DELIMITER).append("startTime=").append(startTime)
                 .append(DELIMITER).append("endTime=").append(endTime));
@@ -187,14 +199,17 @@ public class ModelService {
         tsrRequest.setTerminalId(9049L);
         tsrRequest.setContentType("application/json");
         tsrRequest.setOrgId("10000");
-        tsrRequest.setStartTime("2018-01-21T01:01:01");
-        tsrRequest.setEndTime("2018-03-03T23:59:59");
+        tsrRequest.setStartTime("2018-02-21T05:00:05.201Z");
+        tsrRequest.setEndTime("2018-04-01T07:05:05.101Z");
         return tsrRequest;
     }
-
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         ModelService modelService = new ModelService();
-        List<String> timeIntervals = Arrays.asList("2018-01-21T00:00:00.000", "2018-01-21T12:00:00.000", "2018-01-20T00:00:00.000", "2018-01-20T12:00:00.000","2018-01-19T00:00:00.000", "2018-01-19T12:00:00.000");
+        List<String> timeIntervals = Arrays.asList("2018-04-01T02:01:30.610Z=2018-04-01T02:01:30.610Z",
+                "2018-03-30T23:25:30.420Z=2018-03-30T11:25:30.420Z", "2018-03-30T11:25:29.420Z=2018-03-30T07:25:30.514Z",
+                "2018-03-28T20:25:30.500Z=2018-03-28T15:25:30.561Z", "2018-03-25T23:25:30.111Z=2018-03-25T11:25:30.111Z","2018-03-25T11:25:29.111Z=2018-03-25T09:25:30.120Z",
+                "2018-03-24T17:25:30.215Z=2018-03-24T07:25:30.012Z","2018-03-22T22:25:30.333Z=2018-03-22T10:25:30.333Z","2018-03-22T10:25:29.333Z=2018-03-22T05:25:30.610Z",
+                "2018-03-21T22:25:30.333Z=2018-03-21T10:25:30.333Z","2018-03-21T10:25:29.333Z=2018-03-21T05:25:30.610Z");
         TSRRequest tsrRequest = getTsrReqest();
         modelService.getModelApiRecords(tsrRequest,timeIntervals);
     }

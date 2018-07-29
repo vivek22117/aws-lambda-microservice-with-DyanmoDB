@@ -1,3 +1,4 @@
+/*
 package com.vivek.tsr.service;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -34,9 +35,11 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.eq;
 
+*/
 /**
  * Created by Vivek Kumar Mishra on 22-03-2018.
- */
+ *//*
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class ModelServiceTest {
@@ -59,7 +62,8 @@ public class ModelServiceTest {
     @Test
     public void shouldGetModelApiRecords() throws ExecutionException, InterruptedException, IOException {
 
-        /*ObjectMapper objectMapper = new ObjectMapper();
+        */
+/*ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         ResponseEntity responseEntity = objectMapper.readValue("{\n" +
                 "  \"deviceId\":9049,\n" +
@@ -69,10 +73,13 @@ public class ModelServiceTest {
                 "  \"contentType\":\"application/json\",\n" +
                 "  \"content\":\"data\",\n" +
                 "  \"eventTime\":\"2048-02-22\"\n" +
-                "}", ResponseEntity.class);*/
+                "}", ResponseEntity.class);*//*
+
         List<String> reportedDates = Arrays.asList("2018/01/24", "2018/01/22", "2018/02/03");
-       /* List<String> timeIntervals = reportedDates.stream().map(data -> getFormattedDate(data)).map(d1 -> getNumberOfIntervals(d1))
-                .flatMap(x -> x.stream()).collect(toList());*/
+       */
+/* List<String> timeIntervals = reportedDates.stream().map(data -> getFormattedDate(data)).map(d1 -> getNumberOfIntervals(d1))
+                .flatMap(x -> x.stream()).collect(toList());*//*
+
 
         List<String> timeIntervals = Arrays.asList("2018-01-21T00:00:00.000", "2018-01-21T12:00:00.000", "2018-01-20T00:00:00.000", "2018-01-20T12:00:00.000","2018-01-19T00:00:00.000", "2018-01-19T12:00:00.000");
         TSRRequest tsrRequest = getTsrReqest();
@@ -125,3 +132,4 @@ public class ModelServiceTest {
         return tsrRequest;
     }
 }
+*/

@@ -57,4 +57,13 @@ public class AppUtil {
         return Arrays.asList(startTime, firstInterval);
     }
 
+    public static String getTimeStampToDate(String timeStamp){
+        Instant time = Instant.parse(timeStamp);
+
+        Date date = new Date(time.toEpochMilli());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd");
+        String s = format.format(date);
+        System.out.println(s);
+        return s;
+    }
 }
