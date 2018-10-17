@@ -6,12 +6,28 @@ package com.vivek.tsr.domain;
 public class MyCompany {
 
     private String id;
-    private Long deviceId;
-    private String myOrgId;
-    private String myCompanyId;
-    private String beginTime;
-    private String endTime;
+    private String companyName;
+    private String companyAddress;
+    private String companyBeginDate;
+    private String companyEndDate;
     private boolean isActive;
+
+
+    public String getCompanyBeginDate() {
+        return companyBeginDate;
+    }
+
+    public void setCompanyBeginDate(String companyBeginDate) {
+        this.companyBeginDate = companyBeginDate;
+    }
+
+    public String getCompanyEndDate() {
+        return companyEndDate;
+    }
+
+    public void setCompanyEndDate(String companyEndDate) {
+        this.companyEndDate = companyEndDate;
+    }
 
     public String getId() {
         return id;
@@ -21,44 +37,20 @@ public class MyCompany {
         this.id = id;
     }
 
-    public String getMyOrgId() {
-        return myOrgId;
+    public String getCompanyName() {
+        return companyName;
     }
 
-    public void setMyOrgId(String myOrgId) {
-        this.myOrgId = myOrgId;
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
-    public Long getDeviceId() {
-        return deviceId;
+    public String getCompanyAddress() {
+        return companyAddress;
     }
 
-    public void setDeviceId(Long deviceId) {
-        this.deviceId = deviceId;
-    }
-
-    public String getMyCompanyId() {
-        return myCompanyId;
-    }
-
-    public void setMyCompanyId(String myCompanyId) {
-        this.myCompanyId = myCompanyId;
-    }
-
-    public String getBeginTime() {
-        return beginTime;
-    }
-
-    public void setBeginTime(String beginTime) {
-        this.beginTime = beginTime;
-    }
-
-    public String getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
+    public void setCompanyAddress(String companyAddress) {
+        this.companyAddress = companyAddress;
     }
 
     public boolean isActive() {
@@ -67,5 +59,17 @@ public class MyCompany {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    @Override
+    public String toString() {
+        return "MyCompany{" +
+                "id='" + id + '\'' +
+                ", companyName='" + companyName + '\'' +
+                ", companyAddress='" + companyAddress + '\'' +
+                ", companyBeginDate='" + companyBeginDate + '\'' +
+                ", companyEndDate='" + companyEndDate + '\'' +
+                ", isActive=" + isActive +
+                '}';
     }
 }

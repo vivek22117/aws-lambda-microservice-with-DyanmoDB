@@ -1,10 +1,7 @@
 package com.vivek.tsr.service;
 
-import com.amazonaws.util.StringUtils;
-import com.vivek.tsr.domain.GpiRecord;
-import com.vivek.tsr.domain.TSRRequest;
+import com.vivek.tsr.domain.UserRequest;
 import com.vivek.tsr.utility.AppUtil;
-import sun.security.timestamp.TSRequest;
 
 import java.util.List;
 
@@ -17,10 +14,10 @@ public interface GPILastDataService {
 
     int ddbLimit = 1;
 
-    default List<String> getLastReportedDateFromDDB(TSRRequest tsRequest, DynamoDBOperation dbOperation) {
-        if (!isNullOrEmpty(tsRequest.getStartTime()) && !isNullOrEmpty(tsRequest.getEndTime())) {
-            dbOperation.getByTerminalAndOrgId(tsRequest.getTerminalId(), tsRequest.getOrgId(),
-                    AppUtil.getTimeStampToDate(tsRequest.getStartTime()), AppUtil.getTimeStampToDate(tsRequest.getEndTime()), 1);
+    default List<String> getLastReportedDateFromDDB(UserRequest userRequest, DynamoDBOperation dbOperation) {
+        if (!isNullOrEmpty(userRequest.getStartTime()) && !isNullOrEmpty(userRequest.getEndTime())) {
+            dbOperation.getByTerminalAndOrgId(userRequest.getEmployeeId(), userRequest.getCompanyId(),
+                    AppUtil.getTimeStampToDate(userRequest.getStartTime()), AppUtil.getTimeStampToDate(userRequest.getEndTime()), 1);
         }
 
         return null;

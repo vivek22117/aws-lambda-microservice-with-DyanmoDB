@@ -3,7 +3,7 @@ package com.vivek.tsr.utility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.vivek.tsr.domain.TSRRequest;
+import com.vivek.tsr.domain.UserRequest;
 import org.apache.http.entity.ContentType;
 
 import java.text.ParseException;
@@ -31,9 +31,9 @@ public class AppUtil {
         return "";
     }
 
-    public static boolean isValidContentType(TSRRequest tsrRequest){
-        return ContentType.APPLICATION_JSON.getMimeType().equals(tsrRequest.getContentType())
-                || ContentType.APPLICATION_XML.getMimeType().equals(tsrRequest.getContentType());
+    public static boolean isValidContentType(UserRequest userRequest){
+        return ContentType.APPLICATION_JSON.getMimeType().equals(userRequest.getContentType())
+                || ContentType.APPLICATION_XML.getMimeType().equals(userRequest.getContentType());
     }
 
     public static String getFormattedDate(String date) {

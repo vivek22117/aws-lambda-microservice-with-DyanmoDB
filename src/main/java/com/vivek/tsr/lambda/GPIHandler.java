@@ -2,9 +2,9 @@ package com.vivek.tsr.lambda;
 
 
 import com.vivek.tsr.domain.MyResponse;
-import com.vivek.tsr.domain.TSRRequest;
+import com.vivek.tsr.domain.UserRequest;
 import com.vivek.tsr.exception.ApplicationException;
-import com.vivek.tsr.service.TsrResponse;
+import com.vivek.tsr.service.RequestResponse;
 import com.vivek.tsr.utility.ValidateRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,27 +16,27 @@ import static com.vivek.tsr.utility.AppUtil.isValidContentType;
  * Created by Vivek Kumar Mishra on 30-01-2018.
  */
 public class GPIHandler {
-    private TsrResponse tsrResponse;
+    private RequestResponse requestResponse;
     private ValidateRequest validateRequest;
 
     private static final Logger LOGGER = LogManager.getLogger(GPIHandler.class);
 
     public GPIHandler() {
-        this(new TsrResponse(), new ValidateRequest());
+        this(new RequestResponse(), new ValidateRequest());
     }
 
-    public GPIHandler(TsrResponse tsrResponse, ValidateRequest validateRequest) {
-        this.tsrResponse = tsrResponse;
+    public GPIHandler(RequestResponse requestResponse, ValidateRequest validateRequest) {
+        this.requestResponse = requestResponse;
         this.validateRequest = validateRequest;
     }
 
-    public void processRequest(TSRRequest tsrRequest) {
-        LOGGER.error("Process request has terminalId: ", tsrRequest.getTerminalId());
+    public void processRequest(UserRequest userRequest) {
+        LOGGER.error("Process request has terminalId: ", userRequest.getEmployeeId());
         try {
-            if (validateRequest.validateRequest(tsrRequest)) {
-                if (isValidContentType(tsrRequest)) {
-                    new MyResponse(convert(tsrRequest.getContentType(), tsrResponse.getDsrResponse(tsrRequest)),
-                            tsrRequest.getContentType());
+            if (validateRequest.validateRequest(userRequest)) {
+                if (isValidContentType(userRequest)) {
+                    new MyResponse(convert(userRequest.getContentType(), requestResponse.getDsrResponse(userRequest)),
+                            userRequest.getContentType());
                 }
                 throw new ApplicationException("Content type is not valid: ", null);
             }

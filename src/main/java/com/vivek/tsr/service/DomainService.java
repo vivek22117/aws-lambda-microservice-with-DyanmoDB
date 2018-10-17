@@ -1,16 +1,13 @@
 package com.vivek.tsr.service;
 
-import com.vivek.tsr.domain.GpiRecord;
-import org.apache.logging.log4j.LogManager;
+import com.vivek.tsr.domain.EmployeeRecord;
 import org.apache.logging.log4j.Logger;
-import org.springframework.util.ObjectUtils;
 
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.apache.logging.log4j.LogManager.getLogger;
@@ -33,17 +30,17 @@ public class DomainService {
         this.logger = logger;
     }
 
-    public void processRecords(List<GpiRecord> gpiRecords) {
+    public void processRecords(List<EmployeeRecord> employeeRecords) {
 
-        Map<String, List<GpiRecord>> mapOfGpiRecords = gpiRecords.parallelStream()
-                .filter(gpiRecord -> gpiRecord.getContentType().contains("tsr-content-schema"))
-                .collect(Collectors.groupingBy(gpiRecord -> {
-                    Long deviceId = gpiRecord.getDeviceId();
-                    String orgId = gpiRecord.getOrgId();
-                    return new String(deviceId + "-" + orgId);
+        Map<String, List<EmployeeRecord>> mapOfGpiRecords = employeeRecords.parallelStream()
+                .filter(record -> record.getEmpDesignation().contains("Software-Engineer"))
+                .collect(Collectors.groupingBy(record -> {
+                    String deviceId = record.getEmployeeId();
+                    String orgId = record.getCompanyId();
+                    return deviceId + "-" + orgId;
                 }, toList()));
 
-        Map<String, GpiRecord> gpiRecordMap = mapOfGpiRecords.entrySet().stream()
+        Map<String, EmployeeRecord> gpiRecordMap = mapOfGpiRecords.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, stringListEntry ->
                         stringListEntry.getValue().stream()
                                 .sorted(Comparator.comparing(gpiRecord -> gpiRecord.getEventTime()))
@@ -53,28 +50,28 @@ public class DomainService {
 
     }
 
-    private void persistDataInDynamoDB(Map<String, GpiRecord> gpiRecordMap) {
+    private void persistDataInDynamoDB(Map<String, EmployeeRecord> gpiRecordMap) {
 
         gpiRecordMap.entrySet().stream().forEach(stringGpiRecordEntry -> {
             String key = stringGpiRecordEntry.getKey();
             String[] split = key.split("\\.");
             String deviceId = split[0];
             String orgId = split[1];
-            GpiRecord gpiRecord = stringGpiRecordEntry.getValue();
-            boolean recordStatus = isGpiRecordLastest(deviceId, orgId, gpiRecord);
+            EmployeeRecord employeeRecord = stringGpiRecordEntry.getValue();
+            boolean recordStatus = isGpiRecordLastest(deviceId, orgId, employeeRecord);
             if(recordStatus){
-                dynamoDBOperation.save(gpiRecord);
+                dynamoDBOperation.save(employeeRecord);
             }
         });
     }
 
-    private boolean isGpiRecordLastest(String deviceId, String orgId, GpiRecord gpiRecord) {
+    private boolean isGpiRecordLastest(String deviceId, String orgId, EmployeeRecord employeeRecord) {
         DynamoDBOperation dynamoDBOperation = new DynamoDBOperation();
-        GpiRecord item = dynamoDBOperation.getItem(Long.valueOf(deviceId));
+        EmployeeRecord item = dynamoDBOperation.getItem(Long.valueOf(deviceId));
 
         if(!isEmpty(item)){
             Instant dbItemTime = Instant.parse(item.getEventTime());
-            Instant gpiRecordTime = Instant.parse(gpiRecord.getEventTime());
+            Instant gpiRecordTime = Instant.parse(employeeRecord.getEventTime());
             return gpiRecordTime.isAfter(dbItemTime);
         }
         return true;

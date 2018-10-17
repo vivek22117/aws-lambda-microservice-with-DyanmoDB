@@ -4,7 +4,6 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
@@ -14,8 +13,8 @@ import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
 import com.amazonaws.services.dynamodbv2.model.GetItemResult;
-import com.vivek.tsr.domain.GpiRecord;
-import com.vivek.tsr.entity.LatestReportedRecord;
+import com.vivek.tsr.domain.EmployeeRecord;
+import com.vivek.tsr.entity.LatestEmployeeRecord;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +44,7 @@ public class DynamoDBOperation {
         this.mapper = new DynamoDBMapper(createClient());
     }
 
-    public GpiRecord getItem(Long deviceId) {
+    public EmployeeRecord getItem(Long deviceId) {
 
         GetItemRequest itemRequest = new GetItemRequest()
                 .withTableName(TABLE_NAME)
@@ -56,7 +55,7 @@ public class DynamoDBOperation {
         if (!(item == null)) {
             extractGpiRecord(item);
         }
-        return new GpiRecord();
+        return new EmployeeRecord();
     }
     private void extractGpiRecord(GetItemResult item) {
 
@@ -68,24 +67,24 @@ public class DynamoDBOperation {
         return new HashMap<>();
     }
 
-    public boolean save(LatestReportedRecord recordObject) {
+    public boolean save(LatestEmployeeRecord recordObject) {
         mapper.save(recordObject);
         return true;
     }
 
-    public boolean save(GpiRecord recordObject) {
+    public boolean save(EmployeeRecord recordObject) {
         mapper.save(recordObject);
         return true;
     }
 
-    public void updateItem(LatestReportedRecord record) {
+    public void updateItem(LatestEmployeeRecord record) {
 
         AmazonDynamoDB client = createClient();
         DynamoDB dynamoDB = new DynamoDB(client);
         Table table = dynamoDB.getTable(TABLE_NAME);
 
         UpdateItemSpec itemSpec = new UpdateItemSpec();
-        itemSpec.withPrimaryKey("deviceIdOrgId", record.getDeviceIdCompanyId())
+        itemSpec.withPrimaryKey("empIdCompanyId", record.getEmpIdCompanyId())
                 .withUpdateExpression("add #a :intervals set employeeId =:empId, comapanyId =:cID, createdDate =:date")
                 .withNameMap(new NameMap().with("#a", "timeIntervals"))
                 .withValueMap(new ValueMap().withList(":intervals", record.getTimeIntervals())
@@ -97,9 +96,9 @@ public class DynamoDBOperation {
 
     }
 
-    public List<String> getByTerminalAndOrgId(Long terminalId, String startDate, String endDate, String orgId, int i) {
+    public List<String> getByTerminalAndOrgId(Long terminalId, Long companyId, String startDate, String endDate, int i) {
 
-        return getDates(terminalId + "-" + orgId, startDate, endDate, DB_INDEX, i);
+        return getDates(terminalId + "-" + companyId, startDate, endDate, DB_INDEX, i);
     }
 
     private List<String> getDates(String startDate, String endDate, String globalIndex, String dbIndex, int recordsCount) {

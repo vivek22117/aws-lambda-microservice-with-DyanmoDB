@@ -1,11 +1,10 @@
 package com.vivek.tsr.service;
 
-import com.vivek.tsr.domain.TSRRequest;
+import com.vivek.tsr.domain.UserRequest;
 import com.vivek.tsr.utility.AppUtil;
 
 import java.util.List;
 
-import static com.amazonaws.util.StringUtils.isNullOrEmpty;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -21,9 +20,9 @@ public class TsrLastDataService implements GPILastDataService{
     }
 
 
-    public TsrResponse getLastKnowGpiRecord(TSRRequest tsrRequest) {
+    public RequestResponse getLastKnowGpiRecord(UserRequest userRequest) {
 
-        List<String> reportedDates = getLastReportedDateFromDDB(tsrRequest, dynamoDBOperation);
+        List<String> reportedDates = getLastReportedDateFromDDB(userRequest, dynamoDBOperation);
         List<String> stringIntervals = reportedDates.stream().map(AppUtil::getFormattedDate)
                 .map(AppUtil::getNumberOfIntervals).flatMap(List::stream).collect(toList());
 

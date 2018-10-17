@@ -8,38 +8,31 @@ import java.time.temporal.ChronoUnit;
 /**
  * Created by HARSHA on 30-01-2018.
  */
-public class TSRRequest {
+public class UserRequest {
     private Integer count;
     private String startTime;
     private String endTime;
-    private Integer startIndex;
-    private Long terminalId;
-    private boolean lastKnown;
-
-    private String orgId;
-
     private String contentType;
+    private Integer startIndex;
+    private Long employeeId;
+    private Long companyId;
 
+    private boolean isLastReporting;
 
-    public String getOrgId() {
-        return orgId;
+    public Long getCompanyId() {
+        return companyId;
     }
 
-    public void setOrgId(String orgId) {
-        this.orgId = orgId;
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
     }
 
-
-    public void setStartIndex(Integer startIndex) {
-        this.startIndex = startIndex;
+    public boolean isLastReporting() {
+        return isLastReporting;
     }
 
-    public boolean isLastKnown() {
-        return lastKnown;
-    }
-
-    public void setLastKnown(boolean lastKnown) {
-        this.lastKnown = lastKnown;
+    public void setLastReporting(boolean lastReporting) {
+        isLastReporting = lastReporting;
     }
 
     public String getContentType() {
@@ -74,28 +67,28 @@ public class TSRRequest {
         this.endTime = endTime;
     }
 
-    public int getStartIndex() {
+    public Integer getStartIndex() {
         return startIndex;
     }
 
-    public void setStartIndex(int startIndex) {
+    public void setStartIndex(Integer startIndex) {
         this.startIndex = startIndex;
     }
 
-    public Long getTerminalId() {
-        return terminalId;
+    public Long getEmployeeId() {
+        return employeeId;
     }
 
-    public void setTerminalId(Long terminalId) {
-        this.terminalId = terminalId;
+    public void setEmployeeId(Long employeeId) {
+        this.employeeId = employeeId;
     }
 
     public void initialize() {
-        if (lastKnown) {
+        if (isLastReporting) {
             count = 1;
         }
         if (count == 0 && count != null) {
-            count = 250;
+            count = 50;
         }
         if (startIndex == null) {
             startIndex = 0;

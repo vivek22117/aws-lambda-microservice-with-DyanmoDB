@@ -4,11 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.vivek.tsr.domain.GpiRecord;
+import com.vivek.tsr.domain.EmployeeRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -51,7 +50,7 @@ public class JsonUtility {
         ObjectMapper objectMapper = new ObjectMapper();
         TypeFactory typeFactory = objectMapper.getTypeFactory();
         try {
-            return objectMapper.readValue(json, typeFactory.constructCollectionType(List.class, GpiRecord.class));
+            return objectMapper.readValue(json, typeFactory.constructCollectionType(List.class, EmployeeRecord.class));
         } catch (IOException e) {
             logger.error("Unable to conver json string to list of object: ", e);
         }

@@ -1,7 +1,6 @@
 package com.vivek.tsr.utility;
 
-import com.amazonaws.util.StringUtils;
-import com.vivek.tsr.domain.TSRRequest;
+import com.vivek.tsr.domain.UserRequest;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -13,22 +12,22 @@ import static com.amazonaws.util.StringUtils.*;
  */
 public class ValidateRequest {
 
-    public boolean validateRequest(TSRRequest tsrRequest){
-        if(tsrRequest.isLastKnown()){
-            return validateLastKnownRequestParameters(tsrRequest);
+    public boolean validateRequest(UserRequest userRequest){
+        if(userRequest.isLastReporting()){
+            return validateLastKnownRequestParameters(userRequest);
         }
 
-        return (validateTimeInterval(tsrRequest) && validateCount(tsrRequest));
+        return (validateTimeInterval(userRequest) && validateCount(userRequest));
     }
 
-    private boolean validateLastKnownRequestParameters(TSRRequest tsrRequest) {
-        return (isNullOrEmpty(tsrRequest.getStartTime()) && isNullOrEmpty(tsrRequest.getEndTime())
-                && (Objects.isNull(tsrRequest.getCount())));
+    private boolean validateLastKnownRequestParameters(UserRequest userRequest) {
+        return (isNullOrEmpty(userRequest.getStartTime()) && isNullOrEmpty(userRequest.getEndTime())
+                && (Objects.isNull(userRequest.getCount())));
     }
 
-    private boolean validateTimeInterval(TSRRequest tsrRequest){
-        if(!isNullOrEmpty(tsrRequest.getStartTime()) && !isNullOrEmpty(tsrRequest.getEndTime())){
-            if(Instant.parse(tsrRequest.getStartTime()).isAfter(Instant.parse(tsrRequest.getEndTime()))){
+    private boolean validateTimeInterval(UserRequest userRequest){
+        if(!isNullOrEmpty(userRequest.getStartTime()) && !isNullOrEmpty(userRequest.getEndTime())){
+            if(Instant.parse(userRequest.getStartTime()).isAfter(Instant.parse(userRequest.getEndTime()))){
                 return false;
             }
             return true;
@@ -36,10 +35,10 @@ public class ValidateRequest {
         return true;
     }
 
-    private boolean validateCount(TSRRequest tsrRequest){
-        if(tsrRequest.getCount()<=0){
+    private boolean validateCount(UserRequest userRequest){
+        if(userRequest.getCount()<=0){
             return false;
-        }else if(tsrRequest.getCount() > 250){
+        }else if(userRequest.getCount() > 250){
             return false;
         }
         return true;

@@ -9,10 +9,10 @@ import java.util.List;
  */
 
 @DynamoDBTable(tableName = "MyDyanamoDBTable")
-public class LatestReportedRecord {
+public class LatestEmployeeRecord {
 
-    @DynamoDBHashKey(attributeName = "deviceIdCompanyId")
-    private String deviceIdCompanyId;
+    @DynamoDBHashKey(attributeName = "empIdCompanyId")
+    private String empIdCompanyId;
 
     @DynamoDBAttribute(attributeName = "employeeId")
     private String employeeId;
@@ -34,12 +34,12 @@ public class LatestReportedRecord {
         this.timeIntervals = timeIntervals;
     }
 
-    public String getDeviceIdCompanyId() {
-        return deviceIdCompanyId;
+    public String getEmpIdCompanyId() {
+        return empIdCompanyId;
     }
 
-    public void setDeviceIdCompanyId(String deviceIdCompanyId) {
-        this.deviceIdCompanyId = deviceIdCompanyId;
+    public void setEmpIdCompanyId(String empIdCompanyId) {
+        this.empIdCompanyId = empIdCompanyId;
     }
 
     public String getEmployeeId() {

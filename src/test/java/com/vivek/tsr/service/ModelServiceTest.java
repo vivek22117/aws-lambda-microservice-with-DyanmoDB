@@ -44,7 +44,7 @@ import static org.mockito.Matchers.eq;
 @RunWith(MockitoJUnitRunner.class)
 public class ModelServiceTest {
 
-    private ModelService modelService;
+    private RestService modelService;
 
 
     @Mock
@@ -56,7 +56,7 @@ public class ModelServiceTest {
 
     @Before
     public void setUp(){
-        modelService = new ModelService(restTemplate, new JsonUtility(), LogManager.getLogger(ModelService.class));
+        modelService = new RestService(restTemplate, new JsonUtility(), LogManager.getLogger(RestService.class));
     }
 
     @Test
@@ -82,7 +82,7 @@ public class ModelServiceTest {
 
 
         List<String> timeIntervals = Arrays.asList("2018-01-21T00:00:00.000", "2018-01-21T12:00:00.000", "2018-01-20T00:00:00.000", "2018-01-20T12:00:00.000","2018-01-19T00:00:00.000", "2018-01-19T12:00:00.000");
-        TSRRequest tsrRequest = getTsrReqest();
+        UserRequest tsrRequest = getTsrReqest();
 
 
         Mockito.when(restTemplate.getForEntity(urlCaptor.capture(),eq(String.class)))
@@ -94,7 +94,7 @@ public class ModelServiceTest {
                 .thenReturn(new ResponseEntity<String>(HttpStatus.OK))
                 .thenReturn(new ResponseEntity<String>(HttpStatus.OK));
 
-        List<GpiRecord> modelApiRecords = modelService.getModelApiRecords(tsrRequest, timeIntervals);
+        List<EmployeeRecord> modelApiRecords = modelService.getModelApiRecords(tsrRequest, timeIntervals);
 
         Assert.assertThat(modelApiRecords.size(),is(""));
     }
@@ -120,8 +120,8 @@ public class ModelServiceTest {
         return Arrays.asList(startTime, firstInterval);
     }
 
-    private TSRRequest getTsrReqest() {
-        TSRRequest tsrRequest = new TSRRequest();
+    private UserRequest getTsrReqest() {
+        UserRequest tsrRequest = new UserRequest();
         tsrRequest.setCount(100);
         tsrRequest.setStartIndex(0);
         tsrRequest.setTerminalId(9049L);

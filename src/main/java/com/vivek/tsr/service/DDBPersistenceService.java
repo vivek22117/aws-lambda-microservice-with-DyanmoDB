@@ -1,7 +1,7 @@
 package com.vivek.tsr.service;
 
-import com.vivek.tsr.domain.GpiRecord;
-import com.vivek.tsr.entity.LatestReportedRecord;
+import com.vivek.tsr.domain.EmployeeRecord;
+import com.vivek.tsr.entity.LatestEmployeeRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,11 +29,11 @@ public class DDBPersistenceService {
     }
 
     //created key using terminalID and orgID
-    public void processRecords(List<GpiRecord> gpiRecords) {
-        HashSet<LatestReportedRecord> reportedRecords = new HashSet<>();
-        Map<String, List<GpiRecord>> gpiRecordsWithKeyAndList = gpiRecords.stream()
-                .filter(record -> record.getContentType().contains("tsr-content-schema"))
-                .collect(Collectors.groupingBy(record -> record.getDeviceId() + "-" + record.getOrgId(), toList()));
+    public void processRecords(List<EmployeeRecord> employeeRecords) {
+        HashSet<LatestEmployeeRecord> reportedRecords = new HashSet<>();
+        Map<String, List<EmployeeRecord>> gpiRecordsWithKeyAndList = employeeRecords.stream()
+                .filter(record -> record.getEmpDesignation().contains("Software-Engineer"))
+                .collect(Collectors.groupingBy(record -> record.getEmployeeId() + "-" + record.getCompanyId(), toList()));
 
         gpiRecordsWithKeyAndList.entrySet().stream().forEach(stringListEntry -> {
             if (stringListEntry.getValue().size() > 0) {
@@ -47,27 +47,27 @@ public class DDBPersistenceService {
     }
 
 
-    private LatestReportedRecord createDDBRecord(GpiRecord record) {
-        LatestReportedRecord latestReportedRecord = new LatestReportedRecord();
+    private LatestEmployeeRecord createDDBRecord(EmployeeRecord record) {
+        LatestEmployeeRecord latestEmployeeRecord = new LatestEmployeeRecord();
         List<String> timeIntervals = new ArrayList<>();
         timeIntervals.add(record.getEventTime());
-        latestReportedRecord.setDeviceIdCompanyId(record.getDeviceId() + "-" + record.getCompanyId());
-        latestReportedRecord.setCompanyId(record.getCompanyId());
-        latestReportedRecord.setEmployeeId(record.getEmployeeId());
-        latestReportedRecord.setCreatedDate(String.valueOf(Instant.now()));
-        latestReportedRecord.setTimeIntervals(timeIntervals);
-        return latestReportedRecord;
+        latestEmployeeRecord.setEmpIdCompanyId(record.getEmployeeId() + "-" + record.getCompanyId());
+        latestEmployeeRecord.setCompanyId(record.getCompanyId());
+        latestEmployeeRecord.setEmployeeId(record.getEmployeeId());
+        latestEmployeeRecord.setCreatedDate(String.valueOf(Instant.now()));
+        latestEmployeeRecord.setTimeIntervals(timeIntervals);
+        return latestEmployeeRecord;
     }
 
     /*//created key of eventTimestamp
     public void processRecordsForDifferentKey() {
-        List<GpiRecord> gpiRecords = Arrays.asList(createGpiRecords("2018-03-30T20:30:05.000Z",1001L),
+        List<EmployeeRecord> gpiRecords = Arrays.asList(createGpiRecords("2018-03-30T20:30:05.000Z",1001L),
                 createGpiRecords("2018-03-30T20:05:05.000Z",1002L), createGpiRecords("2018-03-30T18:00:05.000Z",1003L),
                 createGpiRecords("2018-03-30T14:25:05.000Z",1006L),createGpiRecords("2018-03-30T13:25:05.000Z",1005L),
                 createGpiRecords("2018-03-30T10:25:05.000Z",1006L),createGpiRecords("2018-03-30T11:25:05.000Z",1007L),
                 createGpiRecords("2018-03-30T05:25:05.000Z",1006L),createGpiRecords("2018-03-30T05:25:05.000Z",1009L));
-        HashSet<LatestReportedRecord> reportedRecords = new HashSet<>();
-        Map<String, List<GpiRecord>> gpiRecordsWithKeyAndList = gpiRecords.stream()
+        HashSet<LatestEmployeeRecord> reportedRecords = new HashSet<>();
+        Map<String, List<EmployeeRecord>> gpiRecordsWithKeyAndList = gpiRecords.stream()
                 .filter(record -> record.getContentType().contains("tsr-content-schema"))
                 .collect(Collectors.groupingBy(record -> record.getDeviceId() + "-" + record.getOrgId(), toList()));
 
@@ -86,16 +86,16 @@ public class DDBPersistenceService {
                 .filter(record -> record.getContentType().contains("tsr-content-schema"))
                 .collect(Collectors.groupingBy(record -> record.getDeviceId() + "-" + record.getOrgId(), toList()))
                 .entrySet().stream().forEach(p -> mapOfKeyAndTime.put(p.getKey(),
-                p.getValue().stream().sorted(Comparator.comparing(GpiRecord::getEventTime).reversed()).collect(toList()).get(p.getValue().size()-1).getEventTime() +
-                        "-" + p.getValue().stream().sorted(Comparator.comparing(GpiRecord::getEventTime).reversed()).collect(toList()).get(0).getEventTime()));*//*
+                p.getValue().stream().sorted(Comparator.comparing(EmployeeRecord::getEventTime).reversed()).collect(toList()).get(p.getValue().size()-1).getEventTime() +
+                        "-" + p.getValue().stream().sorted(Comparator.comparing(EmployeeRecord::getEventTime).reversed()).collect(toList()).get(0).getEventTime()));*//*
 
 
 //        System.out.println(mapOfKeyAndTime);
         reportedRecords.stream().forEach(reportedRecord -> dynamoDBOperation.save(reportedRecord));
         reportedRecords.stream().forEach(reportedRecord -> dynamoDBOperation.updateItem(reportedRecord));
     }
-    private GpiRecord createGpiRecords(String eventTime, long deviceId) {
-        GpiRecord  gpiRecord = new GpiRecord();
+    private EmployeeRecord createGpiRecords(String eventTime, long deviceId) {
+        EmployeeRecord  gpiRecord = new EmployeeRecord();
         gpiRecord.setDeviceId(deviceId);
         gpiRecord.setOrgId("2001");
         gpiRecord.setCompanyId("MM1");
