@@ -1,0 +1,22 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS CloudFormation sample template that contains a single Lambda function behind an API Gateway",
+
+  "Resources": {
+    "DoubleDigitApi": {
+      "Type": "AWS::ApiGateway::RestApi",
+      "Properties": {
+        "Name": "DoubleDigitApi",
+        "Description": "API used for User Requests"
+      }
+    },
+    "DoubleDigitResource": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "RestApiId": {"Ref": "DoubleDigitApi"},
+        "ParentId": {"Fn::GetAtt": ["DoubleDigitApi", "RootResourceId"]},
+        "PathPart": "users"
+      }
+    }
+  }
+}

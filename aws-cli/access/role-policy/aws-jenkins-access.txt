@@ -1,0 +1,19 @@
+#VALIDATE TEMPLATE
+aws cloudformation validate-template --template-body file://cloudformation/access/role-policy/aws-jenkins-server-role.json
+
+#Creaate role
+aws --profile yash iam create-role --role-name jenkins-server-role \
+--assume-role-policy-document file://cloudformation/access/role-policy/aws-jenkins-server-role.json
+
+#ATTACHE POLICY DOCUMENT
+aws --profile yash iam put-role-policy --role-name jenkins-server-role \
+--policy-name jenkins-server-policy \
+--policy-document file://cloudformation/access/role-policy/aws-jenkins-access-policy.json
+
+#ATTACH AWS MANAGED POLICY
+aws --profile yash iam attach-role-policy --role-name jenkins-server-role --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess
+aws --profile yash iam attach-role-policy --role-name jenkins-server-role --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess
+aws --profile yash iam attach-role-policy --role-name jenkins-server-role --policy-arn arn:aws:iam::aws:policy/AWSElasticBeanstalkFullAccess
+
+#LIST ATTACHED POLICIES TO ROLE
+aws iam list-attached-role-policies --role-name jenkins-server-role

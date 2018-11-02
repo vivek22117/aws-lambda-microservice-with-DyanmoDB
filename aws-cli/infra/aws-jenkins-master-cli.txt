@@ -1,0 +1,20 @@
+#VALIDATE TEMPLATE
+aws cloudformation validate-template --template-body file://cloudformation/infra/jenkins-master/aws-jenkins-master-cft.json
+
+#Creaate cloudformation
+aws --profile yash cloudformation create-stack --stack-name ec2-jenkins-master-by-vivek \
+--template-body file://cloudformation/infra/jenkins-master/aws-jenkins-master-cft.json \
+--parameters ParameterKey=VPCStackName,ParameterValue=vpc-subnet-network-by-vivek
+
+#DESCRIBE STACK CREATION EVENTS
+aws --profile yash cloudformation describe-stack-events \
+--stack-name ec2-jenkins-master-by-vivek \
+--query "StackEvents[].[{Resource:LogicalResourceId,Status:ResourceStatus,Reason:ResourceStatusReason}]" \
+--output table
+
+#WAIT FOR STACK CREATION
+aws --profile yash cloudformation wait stack-create-complete --stack-name ec2-jenkins-master-by-vivek
+
+#DELETE STACK
+aws --profile yash cloudformation delete-stack --stack-name ec2-jenkins-master-by-vivek
+

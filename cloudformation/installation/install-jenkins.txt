@@ -1,0 +1,65 @@
+#JENKINS INSTALLATION IN UBUNTU MACHINE
+wget http://pkg.jenkins-ci.org/debian-stable/jenkins-ci.org.key
+
+
+#ADD THE KEY
+apt-key add jenkins-ci.org.key
+
+
+#UPDATE JENKINS BINARY IN SOURCE LIST FILE
+echo "deb http://pkg.jenkins-ci.org/debian binary/" > /etc/apt/sources.list.d/jenkins.list
+
+#NOW UPDATE AND UPGRADE SOURCE LIST
+apt update
+apt -y upgrade
+
+#INSTALL JAVA PACKAGE
+apt install -y openjdk-8-jdk
+
+#INSTALL NGINX
+apt install -y nginx
+
+#INSTALL JENKINS
+apt install -y jenkins
+
+
+#CHECK FOR NGINX AND JENKINS
+systemctl status nginx | grep Active
+systemctl status jenkins | grep Active
+
+
+#Configure nginx for reverse proxy in front of jenkins server....Application Security -- Logging
+sudo su -  //move to root user
+
+#NOW UNLINK DEFAULT CONIF OF NGINX
+unlink /etc/nginx/sites-enabled/default
+
+#NOW CREATE YOUR OWN CONFIg FILE AND PLACE in conf.g folder of jenkins
+vim /etc/nginx/conf.d/jenkins.conf
+
+
+upstream jenkins {
+    server 127.0.0.1:8080;
+}
+#add nginx server configuration to route all trafic to upstream server
+
+server{
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    location /{
+        proxy_pass http://jenkins;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+}
+
+
+#save
+:wq
+
+#RELOAD NGNIX
+systemctl reload ngnix
+
+
+

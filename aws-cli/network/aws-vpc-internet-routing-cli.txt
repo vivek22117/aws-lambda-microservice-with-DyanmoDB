@@ -1,0 +1,27 @@
+#VALIDATE TEMPLATE
+aws cloudformation validate-template --template-body file://cloudformation/network/aws-vpc-internet-routing.json
+
+#Creaate cloudformation
+aws --profile yash cloudformation create-stack --stack-name vpc-internet-routing-by-vivek \
+--template-body file://cloudformation/network/aws-vpc-internet-routing.json \
+--parameters ParameterKey=VPCStackName,ParameterValue=vpc-subnet-network-by-vivek
+
+#grab vpc id for programatic usede
+VPC_ID=$(aws --profile yash ec2 describe-vpcs --filters "Name=tag:Name, \
+         Values=double-digit-vpc" --query "Vpcs[0].VpcId" --output text)
+
+#DESCRIBE STACK CREATION EVENTS
+aws --profile yash cloudformation describe-stack-events \
+--stack-name vpc-internet-routing-by-vivek \
+--query "StackEvents[].[{Resource:LogicalResourceId,Status:ResourceStatus,Reason:ResourceStatusReason}]" \
+--output table
+
+#WAIT FOR STACK CREATION
+aws --profile yash cloudformation wait stack-create-complete --stack-name vpc-internet-routing-by-vivek
+
+#DESCRIBE ROUTE TABLES
+aws --profile yash ec2 describe-route-tables --filters "Name=vpc-id, Values=vpc-05cc26f77445c904c" \
+--query "RouteTables[].[Tag[?Key==`Name`].Value, Associations[].SubnetId]" --output table
+
+#find route in vpc
+aws --profile yash ec2 describe-route-tables --filters "Name=vpc-id, Values=${VPC_ID}"

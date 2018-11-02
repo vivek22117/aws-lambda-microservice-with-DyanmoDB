@@ -15,17 +15,17 @@ import static com.vivek.tsr.utility.AppUtil.isValidContentType;
 /**
  * Created by Vivek Kumar Mishra on 30-01-2018.
  */
-public class GPIHandler {
+public class APIHandler {
     private RequestResponse requestResponse;
     private ValidateRequest validateRequest;
 
-    private static final Logger LOGGER = LogManager.getLogger(GPIHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(APIHandler.class);
 
-    public GPIHandler() {
+    public APIHandler() {
         this(new RequestResponse(), new ValidateRequest());
     }
 
-    public GPIHandler(RequestResponse requestResponse, ValidateRequest validateRequest) {
+    public APIHandler(RequestResponse requestResponse, ValidateRequest validateRequest) {
         this.requestResponse = requestResponse;
         this.validateRequest = validateRequest;
     }
