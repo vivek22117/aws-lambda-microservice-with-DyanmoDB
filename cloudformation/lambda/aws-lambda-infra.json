@@ -166,8 +166,7 @@
             "Variables": {
               "environment": {
                 "Ref": "Environment"
-              },
-              "logs_directory": "/dd-lambda"
+              }
             }
           }
         }
