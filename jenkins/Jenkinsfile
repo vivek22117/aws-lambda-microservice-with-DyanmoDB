@@ -22,7 +22,7 @@ pipeline {
                         } catch(err){
                              apply = false
                              sh "echo Creating IAM Role"
-                             sh "aws --profile yash iam create-role --role-name ${params.LAMBDAROLE} \
+                             sh "aws iam create-role --role-name ${params.LAMBDAROLE} \
                                  --assume-role-policy-document file://aws-lambda-role.json"
                         }
                         if(apply){

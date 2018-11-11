@@ -1,16 +1,27 @@
 #VALIDATE TEMPLATE
-aws cloudformation validate-template --template-body file://cloudformation/access/role-policy/aws-jenkins-server-role.json
+aws cloudformation validate-template --template-body file://cloudformation/access/jenkins-role-policy/aws-jenkins-server-role.json
 
-#Creaate role
+#Create role
 aws --profile yash iam create-role --role-name jenkins-server-role \
---assume-role-policy-document file://cloudformation/access/role-policy/aws-jenkins-server-role.json
+--assume-role-policy-document file://cloudformation/access/jenkins-role-policy/aws-jenkins-server-role.json
 
+#CREATE NEW VERSION OF POLICY
+aws iam create-policy-version --policy-arn arn:aws:iam::ACC_NUMBER:policy/jenkins-server-access-policy \
+--policy-document file://cloudformation/access/jenkins-role-policy/aws-jenkins-access-policy.json --set-as-default
+
+
+#CREATE POLICY
+aws --profile yash iam create-policy --policy-name jenkins-server-access-policy \
+--policy-document file://cloudformation/access/jenkins-role-policy/aws-jenkins-access-policy.json
+
+//REQUIRED TO ATTACH INLINE POICY
 #ATTACHE POLICY DOCUMENT
 aws --profile yash iam put-role-policy --role-name jenkins-server-role \
 --policy-name jenkins-server-policy \
---policy-document file://cloudformation/access/role-policy/aws-jenkins-access-policy.json
+--policy-document file://cloudformation/access/jenkins-role-policy/aws-jenkins-access-policy.json
 
 #ATTACH AWS MANAGED POLICY
+aws --profile yash iam attach-role-policy --role-name jenkins-server-role --policy-arn arn:aws:iam::ACC_NUM:policy/jenkins-server-access-policy
 aws --profile yash iam attach-role-policy --role-name jenkins-server-role --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess
 aws --profile yash iam attach-role-policy --role-name jenkins-server-role --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess
 aws --profile yash iam attach-role-policy --role-name jenkins-server-role --policy-arn arn:aws:iam::aws:policy/AWSElasticBeanstalkFullAccess

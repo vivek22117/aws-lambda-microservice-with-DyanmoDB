@@ -1,0 +1,12 @@
+#VALIDATE STACK/TEMPLATE
+aws cloudformation --region ${params.REGION} validate-template --template-body file://aws-lambda-infra.json
+
+#CREATE STACK
+aws cloudformation --region ${params.REGION} create-stack --stack-name ${params.LAMBDASTACK} --template-body \
+file://aws-elb-for-ec2.json --parameters ParameterKey=VPCStackName,ParameterValue=${params.VPCSTACK}
+
+
+                            sh "aws cloudformation --region ${params.REGION} wait stack-create-complete --stack-name ${params.LAMBDASTACK}"
+                            sh "aws cloudformation --region ${params.REGION} describe-stack-events --stack-name ${params.LAMBDASTACK} \
+                                --query 'StackEvents[].[{Resource:LogicalResourceId,Status:ResourceStatus,Reason:ResourceStatusReason}]' \
+                                --output table"

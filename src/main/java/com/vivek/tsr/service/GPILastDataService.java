@@ -7,9 +7,6 @@ import java.util.List;
 
 import static com.amazonaws.util.StringUtils.isNullOrEmpty;
 
-/**
- * Created by HARSHA on 28-02-2018.
- */
 public interface GPILastDataService {
 
     int ddbLimit = 1;
