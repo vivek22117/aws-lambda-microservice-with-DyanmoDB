@@ -15,6 +15,7 @@ pipeline {
     }
     parameters {
         string(name: 'LAMBDAROLE', defaultValue: 'lambda-access-role', description: 'Name of VPC Created')
+        string(name: 'LAMBDAPOLICY', defaultValue: 'lambda-access-policy', description: 'Name of VPC Created')
         string(name: 'REGION', defaultValue: 'us-east-1', description:'worspace to use in Terraform')
         string(name: 'ACC_NUM', defaultValue: '', description:'worspace to use in Terraform')
         string(name: 'LAMBDASTACK', defaultValue: 'lambda-by-vivek', description:'worspace to use in Terraform')
@@ -65,7 +66,7 @@ pipeline {
                             apply = false
                             sh "echo updating IAM Policy"
                             sh "aws iam create-policy-version --policy-arn arn:aws:iam::$account:policy/${params.LAMBDAPOLICY} \
-                                --policy-document file://jenkins-role-policy/aws-jenkins-access-policy.json --set-as-default"
+                                --policy-document file://aws-lambda-access-policy.json --set-as-default"
                         }
                         sh "aws iam attach-role-policy --role-name \
                             ${params.LAMBDAROLE} --policy-arn arn:aws:iam::$account:policy/${params.LAMBDAPOLICY}"

@@ -27,10 +27,7 @@
         "dynamodb:UpdateTable"
       ],
       "Effect": "Allow",
-      "Resource": [
-        {"Fn::Join" : ["", ["arn:aws:dynamodb:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":table/dd-user*"]]},
-        {"Fn::Join" : ["", ["arn:aws:dynamodb:", {"Ref": "AWS::Region"}, ":", {"Ref": "AWS::AccountId"}, ":table/dd-task*"]]}
-      ]
+      "Resource": "*"
     },
     {
       "Effect": "Allow",
