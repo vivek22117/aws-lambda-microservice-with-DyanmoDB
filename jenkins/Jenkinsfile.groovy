@@ -57,7 +57,7 @@ pipeline {
                 dir('cloudformation/access/lambda-role-policy'){
                     script {
                         def apply = true
-                        def account = sh(script: "aws sts get-caller-identity --output text --query 'Account'", returnStdout: true)
+                        def policyArn = sh(script: "aws iam list-policies --query 'Policies[?PolicyName==`${params.LAMBDAPOLICY}`].Arn' --output text", returnStdout: true)
                         try {
                             sh "aws iam create-policy --policy-name ${params.LAMBDAPOLICY} \
                                 --policy-document file://aws-lambda-access-policy.json"
@@ -65,11 +65,10 @@ pipeline {
                         } catch(err){
                             apply = false
                             sh "echo updating IAM Policy"
-                            sh "aws iam create-policy-version --policy-arn arn:aws:iam::'$account':policy/${params.LAMBDAPOLICY} \
+                            sh "aws iam create-policy-version --policy-arn $policyArn \
                                 --policy-document file://aws-lambda-access-policy.json --set-as-default"
                         }
-                        sh "aws iam attach-role-policy --role-name \
-                            ${params.LAMBDAROLE} --policy-arn arn:aws:iam::$account:policy/${params.LAMBDAPOLICY}"
+                        sh "aws iam attach-role-policy --role-name ${params.LAMBDAROLE} --policy-arn $policyArn"
                         sh "echo Finished create/update successfully!"
                     }
                 }
