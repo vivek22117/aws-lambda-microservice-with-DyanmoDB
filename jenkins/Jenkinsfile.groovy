@@ -25,7 +25,7 @@ pipeline {
     stages {
         stage('lambda-role'){
             steps {
-                dir('cloudformation/access/lambda-role-policy'){
+                dir('cloudformation/access/lambda-role-policy/'){
                     script {
                         def apply = true
                         def status = null
@@ -54,7 +54,7 @@ pipeline {
         }
         stage('lambda-policy'){
             steps {
-                dir('cloudformation/access/lambda-role-policy'){
+                dir('cloudformation/access/lambda-role-policy/'){
                     script {
                         def apply = true
                         def policyArn = sh(script: "aws iam list-policies --query 'Policies[?PolicyName==`${params.LAMBDAPOLICY}`].Arn' --output text", returnStdout: true)
