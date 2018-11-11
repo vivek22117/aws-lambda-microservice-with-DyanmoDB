@@ -23,6 +23,24 @@
     }
   },
   "Resources": {
+    "CodeBuildBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Join": [
+            "",
+            [
+              "double-digit-",
+              {
+                "Ref": "Environment"
+              }
+            ]
+          ]
+        },
+        "AccessControl": "BucketOwnerFullControl"
+      },
+      "DeletionPolicy": "Delete"
+    },
     "DDSourceQueue": {
       "Type": "AWS::SQS::Queue",
       "DependsOn": [
@@ -90,7 +108,8 @@
       "DependsOn": [
         "DDSourceQueue",
         "DDDeadLetterQueue",
-        "LambdaSecurityGroup"
+        "LambdaSecurityGroup",
+        "CodeBuildBucket"
       ],
       "Properties": {
         "FunctionName": "double-digit-lambda",
@@ -100,15 +119,7 @@
         },
         "Code": {
           "S3Bucket": {
-            "Fn::Join": [
-              "",
-              [
-                "double-digit-",
-                {
-                  "Ref": "Environment"
-                }
-              ]
-            ]
+            "Ref": "CodeBuildBucket"
           },
           "S3Key": {
             "Ref": "S3Key"

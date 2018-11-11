@@ -62,7 +62,7 @@ pipeline {
                 }
             }
         }
-         stage('lambda-infra'){
+        stage('lambda-infra'){
             steps {
                 dir('cloudformation/lambda/'){
                     script {
@@ -97,6 +97,6 @@ pipeline {
                     }
                 }
             }
-         }
+        }
     }
 }
