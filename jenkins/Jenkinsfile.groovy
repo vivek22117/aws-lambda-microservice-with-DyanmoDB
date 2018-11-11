@@ -66,7 +66,7 @@ pipeline {
                             apply = false
                             sh "echo updating IAM Policy"
                             sh "aws iam create-policy-version --policy-document file://aws-lambda-access-policy.json \
-                                --policy-arn $policyArn --set-as-default"
+                                --set-as-default --policy-arn $policyArn"
                         }
                         sh "aws iam attach-role-policy --role-name ${params.LAMBDAROLE} --policy-arn $policyArn"
                         sh "echo Finished create/update successfully!"
