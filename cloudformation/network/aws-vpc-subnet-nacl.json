@@ -55,6 +55,24 @@
         }
       }
     },
+    "InboundPublicNACLAllowSSH": {
+      "Type": "AWS::EC2::NetworkAclEntry",
+      "DependsOn": ["DDPublicNetworkAcl"],
+      "Properties": {
+        "NetworkAclId": {
+          "Ref": "DDPublicNetworkAcl"
+        },
+        "RuleNumber": "101",
+        "Protocol": 6,
+        "RuleAction": "allow",
+        "Egress": "false",
+        "CidrBlock": "0.0.0.0/0",
+        "PortRange": {
+          "From": "22",
+          "To": "22"
+        }
+      }
+    },
     "InboundPublicNACLAllowRemoteNetwork": {
       "Type": "AWS::EC2::NetworkAclEntry",
       "DependsOn": ["DDPublicNetworkAcl"],

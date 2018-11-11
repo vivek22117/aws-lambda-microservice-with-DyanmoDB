@@ -22,7 +22,7 @@ public class PropertyLoader {
                 throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
             }
             // get the property value and print it out
-            return prop.getProperty("propertyKey");
+            return prop.getProperty(propertyKey);
         } catch (Exception e) {
             return null;
         }

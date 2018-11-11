@@ -1,8 +1,5 @@
 package com.vivek.tsr.domain;
 
-/**
- * Created by HARSHA on 07-02-2018.
- */
 public class MyCompany {
 
     private String id;

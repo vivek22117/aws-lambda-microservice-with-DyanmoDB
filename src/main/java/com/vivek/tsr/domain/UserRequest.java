@@ -5,9 +5,6 @@ import jdk.nashorn.internal.ir.IdentNode;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-/**
- * Created by HARSHA on 30-01-2018.
- */
 public class UserRequest {
     private Integer count;
     private String startTime;

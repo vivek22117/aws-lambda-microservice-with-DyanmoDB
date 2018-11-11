@@ -37,7 +37,7 @@ public class KinesisProcessor {
         List<KinesisEvent.KinesisEventRecord> records = kinesisEvent.getRecords();
         List<byte[]> collect = records.stream().map(record -> record.getKinesis().getData().array()).collect(Collectors.toList());
 
-        List<String> stringList = collect.stream().map(e -> e.toString()).collect(Collectors.toList());
+        List<String> stringList = collect.stream().map(Object::toString).collect(Collectors.toList());
         List<EmployeeRecord> employeeRecords = stringList.stream().map(this::convertToObject).collect(Collectors.toList());
 
 //        domainService.processRecords(employeeRecords);

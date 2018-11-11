@@ -133,16 +133,15 @@
               "",
               [
                 "#!/bin/bash \n",
-                "wget http://pkg.jenkins-ci.org/debian-stable/jenkins-ci.org.key \n",
-                "apt-key add jenkins-ci.org.key \n",
-                "echo 'deb http://pkg.jenkins-ci.org/debian binary/' > /etc/apt/sources.list.d/jenkins.list \n",
-                "apt update\n",
-                "apt -y upgrade\n",
-                "# Install Java.\n",
-                "apt -y install java-1.8.0-openjdk\n",
-                "# Install Git.\n",
-                "apt install -y jenkins\n",
-                "apt install -y nginx\n",
+                "wget http://pkg.jenkins-ci.org/debian-stable/jenkins-ci.org.key\n",
+                "sudo apt-key add jenkins-ci.org.key\n",
+                "echo deb http://pkg.jenkins-ci.org/debian binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list\n",
+                "sudo apt update\n",
+                "#Install Java\n",
+                "sudo apt -y install openjdk-8-jdk\n",
+                "#Install Jenkins and nginx\n",
+                "sudo apt install -y jenkins\n",
+                "sudo apt install -y nginx\n",
                 "'\n"
               ]
             ]
@@ -200,7 +199,10 @@
     "JenkinsMasterSG": {
       "Description": "The Security Group ID of Jenkins Master",
       "Value": {
-        "Ref": "JenkinsMasterSecurityGroup"
+        "Fn::GetAtt": [
+          "JenkinsMasterSecurityGroup",
+          "GroupId"
+        ]
       },
       "Export": {
         "Name": {

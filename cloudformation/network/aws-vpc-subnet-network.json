@@ -162,12 +162,12 @@
           "Ref": "DoubleDigitVPC"
         },
         "CidrBlock": "10.0.3.0/25",
-        "AvailabilityZone": "us-east-1c",
+        "AvailabilityZone": "us-east-1b",
         "MapPublicIpOnLaunch": false,
         "Tags": [
           {
             "Key": "Name",
-            "Value": "DB-dd-private-subnet-1c"
+            "Value": "DB-dd-private-subnet-1b"
           },
           {
             "Key": "component",

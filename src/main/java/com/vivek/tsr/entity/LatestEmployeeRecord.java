@@ -4,10 +4,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.*;
 
 import java.util.List;
 
-/**
- * Created by Vivek Kumar Mishra on 24-03-2018.
- */
-
 @DynamoDBTable(tableName = "MyDyanamoDBTable")
 public class LatestEmployeeRecord {
 

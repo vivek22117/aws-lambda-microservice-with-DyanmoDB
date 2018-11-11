@@ -27,7 +27,7 @@ import java.util.Map;
 public class DynamoDBOperation {
 
     private static final String TABLE_NAME = "MyDyanamoDBTable";
-    private static final String DEVICE_ID = "deviceId";
+    private static final String EMP_ID = "empId";
     private static final String DB_INDEX = "TSRIndex";
     private DynamoDBMapper mapper = new DynamoDBMapper(createClient());
 
@@ -44,11 +44,11 @@ public class DynamoDBOperation {
         this.mapper = new DynamoDBMapper(createClient());
     }
 
-    public EmployeeRecord getItem(Long deviceId) {
+    public EmployeeRecord getItem(Long empId) {
 
         GetItemRequest itemRequest = new GetItemRequest()
                 .withTableName(TABLE_NAME)
-                .withKey(getItemKey(deviceId));
+                .withKey(getItemKey(empId));
         AmazonDynamoDB dynamoDB = createClient();
         GetItemResult item = dynamoDB.getItem(itemRequest);
 
@@ -63,7 +63,7 @@ public class DynamoDBOperation {
 
     private Map<String, AttributeValue> getItemKey(Long deviceId) {
         Map<String, AttributeValue> item = new HashMap<>();
-        item.put(DEVICE_ID, new AttributeValue().withN(String.valueOf(deviceId)));
+        item.put(EMP_ID, new AttributeValue().withN(String.valueOf(deviceId)));
         return new HashMap<>();
     }
 
@@ -104,7 +104,7 @@ public class DynamoDBOperation {
     private List<String> getDates(String startDate, String endDate, String globalIndex, String dbIndex, int recordsCount) {
 
         Map<String, AttributeValue> expressionAttribute = new HashMap<>();
-        expressionAttribute.put("deviceIdOrgId", new AttributeValue().withS(globalIndex));
+        expressionAttribute.put("empIdCompanyId", new AttributeValue().withS(globalIndex));
         expressionAttribute.put("employeeId", new AttributeValue().withS(dbIndex));
         expressionAttribute.put("createdDate", new AttributeValue().withS(startDate));
         expressionAttribute.put("createdDate", new AttributeValue().withS(endDate));

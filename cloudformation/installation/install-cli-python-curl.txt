@@ -1,0 +1,30 @@
+#THESE Commands run on Ubutu server
+
+apt-get update
+
+#check and install python and curl
+hash python 2>/dev/null || {apt-get install -y python;}
+hash curl 2>/dev/null || {apt-get install -y curl;}
+hash jq 2>/dev/null || {apt-get install -y jq;}   //it is a json parsing and query tool
+
+#CHECK INSTALLATION
+which python
+which jq
+which curl
+
+
+#NOw install PIP
+curl -s https://bootstrap.pypa.io/get-pip.py | python
+
+#VERIFY
+pip --version
+
+#NOW INSTALL AWS CLI
+pip install awscli
+
+#check aws version
+aws --version
+
+#INSTALL BOTO3
+pip install boto3
+

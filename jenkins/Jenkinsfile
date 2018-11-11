@@ -1,0 +1,102 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'LAMBDAROLE', defaultValue: 'lambda-access-role', description: 'Name of VPC Created')
+        string(name: 'REGION', defaultValue: 'us-east-1', description:'worspace to use in Terraform')
+        string(name: 'ACC_NUM', defaultValue: '', description:'worspace to use in Terraform')
+        string(name: 'LAMBDASTACK', defaultValue: 'lambda-by-vivek', description:'worspace to use in Terraform')
+        string(name: 'VPCSTACK', defaultValue: 'vpc-subnet-network-by-vivek', description:'worspace to use in Terraform')
+        string(name: 'DBSTACK', defaultValue: 'rds-by-vivek', description:'RDS for Web Server')
+    }
+    stages {
+        stage('lambda-role'){
+            steps {
+                dir('cloudformation/access/lambda-role-policy'){
+                    script {
+                        def apply = true
+                        def status = null
+                        try {
+                            sh "aws iam get-role --role-name ${params.LAMBDAROLE}"
+                            apply = true
+                        } catch(err){
+                             apply = false
+                             sh "echo Creating IAM Role"
+                             sh "aws --profile yash iam create-role --role-name ${params.LAMBDAROLE} \
+                                 --assume-role-policy-document file://aws-lambda-role.json"
+                        }
+                        if(apply){
+                            try {
+                                 sh "echo Stack exists, attempting update..."
+                                 sh "aws iam update-assume-role-policy --role-name ${params.LAMBDAROLE} \
+                                    --policy-document file://aws-lambda-role.json"
+                            } catch(err){
+                                sh "echo Finished create/update - no updates to be performed"
+                            }
+                        }
+                        sh "echo Finished create/update successfully!"
+                    }
+                }
+            }
+        }
+        stage('lambda-policy'){
+            steps {
+                dir('cloudformation/access/lambda-role-policy'){
+                    script {
+                        def apply = true
+                        def account = sh(script: "aws sts get-caller-identity --output text --query 'Account'", returnStdout: true)
+                        try {
+                            sh "aws iam create-policy --policy-name ${params.LAMBDAPOLICY} \
+                                --policy-document file://aws-lambda-access-policy.json"
+                            apply = true
+                        } catch(err){
+                            apply = false
+                            sh "echo updating IAM Policy"
+                            sh "aws iam create-policy-version --policy-arn arn:aws:iam::$account:policy/${params.LAMBDAPOLICY} \
+                                --policy-document file://jenkins-role-policy/aws-jenkins-access-policy.json --set-as-default"
+                        }
+                        sh "aws iam attach-role-policy --role-name \
+                            ${params.LAMBDAROLE} --policy-arn arn:aws:iam::$account:policy/${params.LAMBDAPOLICY}"
+                        sh "echo Finished create/update successfully!"
+                    }
+                }
+            }
+        }
+         stage('lambda-infra'){
+            steps {
+                dir('cloudformation/lambda/'){
+                    script {
+                        def apply = true
+                        def status = null
+                        try {
+                            status = sh(script: "aws cloudformation describe-stacks --region ${params.REGION} \
+                                --stack-name ${params.LAMBDASTACK} --query Stacks[0].StackStatus --output text", returnStdout: true)
+                            apply = true
+                        } catch(err){
+                            apply = false
+                            sh 'echo Creating Lambda infra for serverless application....'
+                            sh "aws cloudformation --region ${params.REGION} validate-template --template-body file://aws-lambda-infra.json"
+                            sh "aws cloudformation --region ${params.REGION} create-stack --stack-name ${params.LAMBDASTACK} --template-body \
+                                file://aws-elb-for-ec2.json --parameters ParameterKey=VPCStackName,ParameterValue=${params.VPCSTACK}"
+                            sh "aws cloudformation --region ${params.REGION} wait stack-create-complete --stack-name ${params.LAMBDASTACK}"
+                            sh "aws cloudformation --region ${params.REGION} describe-stack-events --stack-name ${params.LAMBDASTACK} \
+                                --query 'StackEvents[].[{Resource:LogicalResourceId,Status:ResourceStatus,Reason:ResourceStatusReason}]' \
+                                --output table"
+                        }
+                        if(apply){
+                            try {
+                                sh "echo Stack exists, attempting update..."
+                                sh "aws cloudformation --region ${params.REGION} update-stack --stack-name \
+                                    ${params.LAMBDASTACK} --template-body file://aws-lambda-infra.json \
+                                    --parameters ParameterKey=VPCStackName,ParameterValue=${params.VPCSTACK}"
+                            } catch(err){
+                                sh "echo Finished create/update - no updates to be performed"
+                            }
+                        }
+                        sh "echo Finished create/update successfully!"
+                    }
+                }
+            }
+         }
+    }
+}

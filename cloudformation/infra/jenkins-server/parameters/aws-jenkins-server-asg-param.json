@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "VPCStackName",
+    "ParameterValue": "vpc-subnet-network-by-vivek"
+  },
+  {
+    "ParameterKey": "JenkinsMasterStackName",
+    "ParameterValue": "ec2-jenkins-master-by-vivek"
+  }
+]

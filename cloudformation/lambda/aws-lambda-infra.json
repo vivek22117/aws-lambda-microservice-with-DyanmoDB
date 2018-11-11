@@ -1,0 +1,196 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS CloudFormation sample template that contains a single Lambda function behind an API Gateway",
+  "Parameters": {
+    "VPCStackName": {
+      "Description": "VPC to refer",
+      "Type": "String"
+    },
+    "Environment": {
+      "Description": "Environment to which cft is created",
+      "Type": "String",
+      "Default": "devl"
+    },
+    "LambdaAccessRole": {
+      "Description": "Instance profile for ec2",
+      "Type": "String",
+      "Default": "lambda-access-role"
+    },
+    "S3Key": {
+      "Description": "The location and name of your source code .zip file.",
+      "Type": "String",
+      "Default": "lambda/*.zip"
+    }
+  },
+  "Resources": {
+    "DDSourceQueue": {
+      "Type": "AWS::SQS::Queue",
+      "DependsOn": [
+        "DDDeadLetterQueue"
+      ],
+      "Properties": {
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "MyDeadLetterQueue",
+              "Arn"
+            ]
+          },
+          "maxReceiveCount": 5
+        }
+      }
+    },
+    "DDDeadLetterQueue": {
+      "Type": "AWS::SQS::Queue"
+    },
+    "LambdaSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable acces from CPC Cidr",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${VPCStackName}-VPCId"
+          }
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "lambda-sg"
+          },
+          {
+            "Key": "component",
+            "Value": "double-digit-test"
+          },
+          {
+            "Key": "environment",
+            "Value": {
+              "Ref": "Environment"
+            }
+          }
+        ]
+      }
+    },
+    "SGOutboundRule": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "IpProtocol": -1,
+        "FromPort": 0,
+        "ToPort": 65535,
+        "CidrIp": "10.0.0.0/22",
+        "GroupId": {
+          "Fn::GetAtt": [
+            "LambdaSecurityGroup",
+            "GroupId"
+          ]
+        }
+      }
+    },
+    "RequestProcessorLambda": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": [
+        "DDSourceQueue",
+        "DDDeadLetterQueue",
+        "LambdaSecurityGroup"
+      ],
+      "Properties": {
+        "FunctionName": "double-digit-lambda",
+        "Handler": "com.vivek.tsr.lambda.SQSProcessor::processSQSRequest",
+        "Role": {
+          "Ref": "LambdaAccessRole"
+        },
+        "Code": {
+          "S3Bucket": {
+            "Fn::Join": [
+              "",
+              [
+                "double-digit-",
+                {
+                  "Ref": "Environment"
+                }
+              ]
+            ]
+          },
+          "S3Key": {
+            "Ref": "S3Key"
+          }
+        },
+        "Runtime": "java8",
+        "Timeout": 10,
+        "MemorySize": 128,
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Ref": "LambdaSecurityGroup"
+            }
+          ],
+          "SubnetIds": [
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${VPCStackName}-PrivateSubnetId-B"
+              }
+            },
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${VPCStackName}-PrivateSubnetId-A"
+              }
+            }
+          ],
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "dd-lambda"
+            },
+            {
+              "Key": "billing",
+              "Value": "doubledigit"
+            },
+            {
+              "Key": "environment",
+              "Value": {
+                "Ref": "Environment"
+              }
+            }
+          ],
+          "Environment": {
+            "Variables": {
+              "environment": {
+                "Ref": "Environment"
+              },
+              "logs_directory": "/dd-lambda"
+            }
+          }
+        }
+      },
+      "EventSourceMapping": {
+        "Type": "AWS::Lambda::EventSourceMapping",
+        "Properties": {
+          "EventSourceArn": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sqs:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId"
+                },
+                ":",
+                {
+                  "Ref": "DDSourceQueue"
+                }
+              ]
+            ]
+          },
+          "FunctionName": {
+            "Fn::GetAtt": [
+              "LambdaFunction",
+              "Arn"
+            ]
+          },
+          "StartingPosition": "TRIM_HORIZON"
+        }
+      }
+    }
+  }

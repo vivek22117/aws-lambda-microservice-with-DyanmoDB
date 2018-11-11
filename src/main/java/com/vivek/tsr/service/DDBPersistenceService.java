@@ -28,7 +28,7 @@ public class DDBPersistenceService {
         this.logger = logger;
     }
 
-    //created key using terminalID and orgID
+    //created key using EmployeeId and CompanyId
     public void processRecords(List<EmployeeRecord> employeeRecords) {
         HashSet<LatestEmployeeRecord> reportedRecords = new HashSet<>();
         Map<String, List<EmployeeRecord>> gpiRecordsWithKeyAndList = employeeRecords.stream()

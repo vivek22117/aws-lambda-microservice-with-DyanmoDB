@@ -35,9 +35,9 @@ public class DomainService {
         Map<String, List<EmployeeRecord>> mapOfGpiRecords = employeeRecords.parallelStream()
                 .filter(record -> record.getEmpDesignation().contains("Software-Engineer"))
                 .collect(Collectors.groupingBy(record -> {
-                    String deviceId = record.getEmployeeId();
-                    String orgId = record.getCompanyId();
-                    return deviceId + "-" + orgId;
+                    String empId = record.getEmployeeId();
+                    String companyId = record.getCompanyId();
+                    return empId + "-" + companyId;
                 }, toList()));
 
         Map<String, EmployeeRecord> gpiRecordMap = mapOfGpiRecords.entrySet().stream()
@@ -55,19 +55,19 @@ public class DomainService {
         gpiRecordMap.entrySet().stream().forEach(stringGpiRecordEntry -> {
             String key = stringGpiRecordEntry.getKey();
             String[] split = key.split("\\.");
-            String deviceId = split[0];
-            String orgId = split[1];
+            String empId = split[0];
+            String companyId = split[1];
             EmployeeRecord employeeRecord = stringGpiRecordEntry.getValue();
-            boolean recordStatus = isGpiRecordLastest(deviceId, orgId, employeeRecord);
+            boolean recordStatus = isGpiRecordLastest(empId, companyId, employeeRecord);
             if(recordStatus){
                 dynamoDBOperation.save(employeeRecord);
             }
         });
     }
 
-    private boolean isGpiRecordLastest(String deviceId, String orgId, EmployeeRecord employeeRecord) {
+    private boolean isGpiRecordLastest(String empId, String companyId, EmployeeRecord employeeRecord) {
         DynamoDBOperation dynamoDBOperation = new DynamoDBOperation();
-        EmployeeRecord item = dynamoDBOperation.getItem(Long.valueOf(deviceId));
+        EmployeeRecord item = dynamoDBOperation.getItem(Long.valueOf(empId));
 
         if(!isEmpty(item)){
             Instant dbItemTime = Instant.parse(item.getEventTime());

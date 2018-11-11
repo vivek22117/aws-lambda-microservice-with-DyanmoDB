@@ -1,0 +1,244 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Create EC2 Jenkins build Servers with SecurityGroup",
+  "Parameters": {
+    "VPCStackName": {
+      "Description": "VPC to refer",
+      "Type": "String"
+    },
+    "JenkinsMasterStackName": {
+      "Description": "jenkins Master stack to refer",
+      "Type": "String"
+    },
+    "KeyPairName": {
+      "Default": "build-server",
+      "Description": "Key pair for ec2 instances",
+      "Type": "String"
+    },
+    "InstanceType": {
+      "Description": "WebServer EC2 instance type",
+      "Type": "String",
+      "Default": "t2.micro",
+      "AllowedValues": [
+        "t1.micro",
+        "t2.nano",
+        "t2.micro"
+      ],
+      "ConstraintDescription": "must be a valid EC2 instance type."
+    },
+    "Environment": {
+      "Description": "Environment to which cft is created",
+      "Type": "String",
+      "Default": "devl"
+    },
+    "JenkinsServerRole": {
+      "Description": "Instance profile for ec2",
+      "Type": "String",
+      "Default": "jenkins-server-role"
+    }
+  },
+  "Mappings": {
+    "RegionAMI": {
+      "us-east-1": {
+        "Ubuntu": "ami-0ac019f4fcb7cb7e6",
+        "Linux": "ami-013be31976ca2c322"
+      }
+    }
+  },
+  "Resources": {
+    "EC2ServerSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable SSH from jenkins master only",
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${VPCStackName}-VPCId"
+          }
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "jenkins-build-server"
+          },
+          {
+            "Key": "component",
+            "Value": "double-digit-test"
+          },
+          {
+            "Key": "environment",
+            "Value": {
+              "Ref": "Environment"
+            }
+          }
+        ]
+      }
+    },
+    "SGOutboundRule": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "IpProtocol": -1,
+        "FromPort": 0,
+        "ToPort": 65535,
+        "CidrIp": "0.0.0.0/0",
+        "GroupId": {
+          "Fn::GetAtt": [
+            "EC2ServerSecurityGroup",
+            "GroupId"
+          ]
+        }
+      }
+    },
+    "SGInboundRule": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "IpProtocol": 6,
+        "FromPort": 22,
+        "ToPort": 22,
+        "SourceSecurityGroupId": {
+          "Fn::ImportValue": {
+            "Fn::Sub": "${JenkinsMasterStackName}-SG-ID"
+          }
+        },
+        "GroupId": {
+          "Fn::GetAtt": [
+            "EC2ServerSecurityGroup",
+            "GroupId"
+          ]
+        }
+      }
+    },
+    "JenkinsServerInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "InstanceProfileName": "jenkins-server-instance-profile",
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "JenkinsServerRole"
+          }
+        ]
+      }
+    },
+    "EC2AutoscalingLaunchConfig": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "DependsOn": [
+        "EC2ServerSecurityGroup",
+        "JenkinsServerInstanceProfile"
+      ],
+      "Properties": {
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionAMI",
+            {
+              "Ref": "AWS::Region"
+            },
+            "Linux"
+          ]
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "EC2ServerSecurityGroup"
+          }
+        ],
+        "IamInstanceProfile": {
+          "Ref": "JenkinsServerInstanceProfile"
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -xe\n",
+                "yum update -y aws-cfn-bootstrap\n",
+                "#Install the Java.\n",
+                "yum install -y java-1.8.0-openjdk\n",
+                "yum -y install git\n",
+                "#Install the AWS CLI.\n",
+                "/usr/bin/easy_install awsebcli\n",
+                "/opt/aws/bin/cfn-signal -e $? ",
+                "         --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "         --resource EC2WebserverASGroup ",
+                "         --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n"
+              ]
+            ]
+          }
+        },
+        "KeyName": {
+          "Ref": "KeyPairName"
+        }
+      }
+    },
+    "EC2WebserverASGroup": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "AutoScalingGroupName": "ec2-server-asg",
+        "MaxSize": 3,
+        "MinSize": 2,
+        "DesiredCapacity": 2,
+        "LaunchConfigurationName": {
+          "Ref": "EC2AutoscalingLaunchConfig"
+        },
+        "VPCZoneIdentifier": [
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${VPCStackName}-PrivateSubnetId-B"
+            }
+          },
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${VPCStackName}-PrivateSubnetId-A"
+            }
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "jenkins-build-server",
+            "PropagateAtLaunch": "true"
+          },
+          {
+            "Key": "component",
+            "Value": "double-digit-test",
+            "PropagateAtLaunch": "true"
+          },
+          {
+            "Key": "environment",
+            "Value": {
+              "Ref": "Environment"
+            },
+            "PropagateAtLaunch": "true"
+          },
+          {
+            "Key": "Scope",
+            "Value": "private",
+            "PropagateAtLaunch": "true"
+          }
+        ]
+      },
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Count": 2,
+          "Timeout": "PT12M"
+        }
+      },
+      "UpdatePolicy": {
+        "AutoScalingRollingUpdate": {
+          "MinInstancesInService": "1",
+          "MaxBatchSize": "1",
+          "PauseTime": "PT12M",
+          "WaitOnResourceSignals": "true"
+        }
+      }
+    }
+  }
+}
