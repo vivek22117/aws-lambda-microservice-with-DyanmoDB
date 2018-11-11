@@ -6,7 +6,7 @@
       "Description": "VPC to refer",
       "Type": "String"
     },
-    "Environment": {
+    "Env": {
       "Description": "Environment to which cft is created",
       "Type": "String",
       "Default": "devl"
@@ -32,7 +32,7 @@
             [
               "double-digit-",
               {
-                "Ref": "Environment"
+                "Ref": "Env"
               }
             ]
           ]
@@ -82,7 +82,7 @@
           {
             "Key": "environment",
             "Value": {
-              "Ref": "Environment"
+              "Ref": "Env"
             }
           }
         ]
@@ -158,14 +158,14 @@
             {
               "Key": "environment",
               "Value": {
-                "Ref": "Environment"
+                "Ref": "Env"
               }
             }
           ],
           "Environment": {
             "Variables": {
               "environment": {
-                "Ref": "Environment"
+                "Ref": "Env"
               }
             }
           }
