@@ -1,6 +1,18 @@
+def createLambdaStack(String region, String stack, String vpc){
+    sh "aws cloudformation --region ${region} validate-template --template-body file://aws-lambda-infra.json"
+    sh "aws cloudformation --region ${region} create-stack --stack-name ${stack} --template-body \
+        file://aws-elb-for-ec2.json --parameters ParameterKey=VPCStackName,ParameterValue=${vpc}"
+    sh "aws cloudformation --region ${region} wait stack-create-complete --stack-name ${stack}"
+    sh "aws cloudformation --region ${region} describe-stack-events --stack-name ${stack} \
+        --query 'StackEvents[].[{Resource:LogicalResourceId,Status:ResourceStatus,Reason:ResourceStatusReason}]' \
+        --output table"
+}
+
 pipeline {
     agent any
-
+    options {
+        timestamps()
+    }
     parameters {
         string(name: 'LAMBDAROLE', defaultValue: 'lambda-access-role', description: 'Name of VPC Created')
         string(name: 'REGION', defaultValue: 'us-east-1', description:'worspace to use in Terraform')
@@ -68,20 +80,22 @@ pipeline {
                     script {
                         def apply = true
                         def status = null
+                        def region = params.REGION
+                        def stackName = params.LAMBDASTACK
+                        def vpc = params.VPCSTACK
                         try {
                             status = sh(script: "aws cloudformation describe-stacks --region ${params.REGION} \
                                 --stack-name ${params.LAMBDASTACK} --query Stacks[0].StackStatus --output text", returnStdout: true)
+                            if (status == 'DELETE_FAILED' || 'ROLLBACK_COMPLETE' || 'ROLLBACK_FAILED' || 'UPDATE_ROLLBACK_FAILED') {
+                                sh "aws cloudformation delete-stack --stack-name ${params.LAMBDASTACK} --region ${params.REGION}"
+                                sh 'echo Creating ASG group and configuration for web application....'
+                                createLambdaStack(region, stackName, vpc)
+                            }
                             apply = true
                         } catch(err){
                             apply = false
-                            sh 'echo Creating Lambda infra for serverless application....'
-                            sh "aws cloudformation --region ${params.REGION} validate-template --template-body file://aws-lambda-infra.json"
-                            sh "aws cloudformation --region ${params.REGION} create-stack --stack-name ${params.LAMBDASTACK} --template-body \
-                                file://aws-elb-for-ec2.json --parameters ParameterKey=VPCStackName,ParameterValue=${params.VPCSTACK}"
-                            sh "aws cloudformation --region ${params.REGION} wait stack-create-complete --stack-name ${params.LAMBDASTACK}"
-                            sh "aws cloudformation --region ${params.REGION} describe-stack-events --stack-name ${params.LAMBDASTACK} \
-                                --query 'StackEvents[].[{Resource:LogicalResourceId,Status:ResourceStatus,Reason:ResourceStatusReason}]' \
-                                --output table"
+                            sh 'echo Creating Lambda infra for serverless application for first time....'
+                            createLambdaStack(region, stackName, vpc)
                         }
                         if(apply){
                             try {
