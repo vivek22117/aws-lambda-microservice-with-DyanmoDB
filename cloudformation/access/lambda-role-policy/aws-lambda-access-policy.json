@@ -9,6 +9,13 @@
       "Resource": "arn:aws:logs:*:*:*"
     },
     {
+      "Effect": "Allow",
+      "Action": [
+        "sqs:*"
+      ],
+      "Resource": "*"
+    },
+    {
       "Action": [
         "dynamodb:BatchGetItem",
         "dynamodb:BatchWriteItem",
