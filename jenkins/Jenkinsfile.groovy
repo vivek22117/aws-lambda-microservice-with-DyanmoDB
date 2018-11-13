@@ -60,7 +60,7 @@ pipeline {
                         def policyArn = sh(script: "aws iam list-policies --query 'Policies[?PolicyName==`${params.LAMBDAPOLICY}`].Arn' --output text", returnStdout: true)
                         try {
                            policyArn = sh(script: "aws iam create-policy --policy-name ${params.LAMBDAPOLICY} \
-                                --policy-document file://aws-lambda-access-policy.json 'Arn' --output text", returnStdout: true)
+                                --policy-document file://aws-lambda-access-policy.json --query 'Arn' --output text", returnStdout: true)
                             apply = true
                         } catch(err){
                             apply = false
