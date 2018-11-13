@@ -88,6 +88,8 @@ pipeline {
                                 --stack-name ${params.LAMBDASTACK} --query Stacks[0].StackStatus --output text", returnStdout: true)
                             if (status == 'DELETE_FAILED' || 'ROLLBACK_COMPLETE' || 'ROLLBACK_FAILED' || 'UPDATE_ROLLBACK_FAILED') {
                                 sh "aws cloudformation delete-stack --stack-name ${params.LAMBDASTACK} --region ${params.REGION}"
+                                sh "Waiting for stack to delete...."
+                                sh "aws cloudformation --region ${params.REGION} wait stack-delete-complete --stack-name ${params.LAMBDASTACK}"
                                 sh 'echo Creating ASG group and configuration for web application after deleting....'
                                 createLambdaStack(region, stackName, vpc)
                             }
