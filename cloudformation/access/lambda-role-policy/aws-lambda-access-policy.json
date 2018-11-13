@@ -11,7 +11,13 @@
     {
       "Effect": "Allow",
       "Action": [
-        "sqs:*"
+        "sqs:ChangeMessageVisibility",
+        "sqs:CreateQueue",
+        "sqs:ReceiveMessage",
+        "sqs:SendMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:GetQueueUrl",
+        "sqs:ListQueues"
       ],
       "Resource": "*"
     },
