@@ -133,40 +133,40 @@
             {
               "Ref": "LambdaSecurityGroup"
             }
-          ],
-          "SubnetIds": [
-            {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${VPCStackName}-PrivateSubnetId-B"
-              }
-            },
-            {
-              "Fn::ImportValue": {
-                "Fn::Sub": "${VPCStackName}-PrivateSubnetId-A"
-              }
+          ]
+        },
+        "SubnetIds": [
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${VPCStackName}-PrivateSubnetId-B"
             }
-          ],
-          "Tags": [
-            {
-              "Key": "Name",
-              "Value": "dd-lambda"
-            },
-            {
-              "Key": "billing",
-              "Value": "doubledigit"
-            },
-            {
-              "Key": "environment",
-              "Value": {
-                "Ref": "Env"
-              }
+          },
+          {
+            "Fn::ImportValue": {
+              "Fn::Sub": "${VPCStackName}-PrivateSubnetId-A"
             }
-          ],
-          "Environment": {
-            "Variables": {
-              "environment": {
-                "Ref": "Env"
-              }
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "dd-lambda"
+          },
+          {
+            "Key": "billing",
+            "Value": "doubledigit"
+          },
+          {
+            "Key": "environment",
+            "Value": {
+              "Ref": "Env"
+            }
+          }
+        ],
+        "Environment": {
+          "Variables": {
+            "environment": {
+              "Ref": "Environment"
             }
           }
         }
