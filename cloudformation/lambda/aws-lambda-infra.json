@@ -115,7 +115,16 @@
         "FunctionName": "double-digit-lambda",
         "Handler": "com.vivek.tsr.lambda.SQSProcessor::processSQSRequest",
         "Role": {
-          "Ref": "LambdaAccessRole"
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:iam::",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":role/lambda-access-role"
+            ]
+          ]
         },
         "Code": {
           "S3Bucket": {
