@@ -11,8 +11,7 @@ def createLambdaStack(String region, String stack, String vpc, String s3){
 
 def createS3Stack(String region, String stack, String vpc){
     sh "aws cloudformation --region ${region} validate-template --template-body file://aws-lambda-deploy-bucket.json"
-    sh "aws cloudformation --region ${region} create-stack --stack-name ${stack} --template-body \
-        file://aws-lambda-deploy-bucket.json --parameters ParameterKey=VPCStackName,ParameterValue=${vpc}"
+    sh "aws cloudformation --region ${region} create-stack --stack-name ${stack} --template-body file://aws-lambda-deploy-bucket.json"
     sh "aws cloudformation --region ${region} wait stack-create-complete --stack-name ${stack}"
     sh "aws cloudformation --region ${region} describe-stack-events --stack-name ${stack} \
         --query 'StackEvents[].[{Resource:LogicalResourceId,Status:ResourceStatus,Reason:ResourceStatusReason}]' \
