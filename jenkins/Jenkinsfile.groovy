@@ -112,7 +112,7 @@ pipeline {
                             sh 'echo Creating S3 Bucket for first time....'
                             createS3Stack(region, stackName, vpc)
                         }
-                        sh "aws s3 --region $region cp SampleApp_Linux.zip s3://double-digit-devl/ --acl public-read"
+                        sh "aws s3 --region $region cp $WORKSPACE/SampleApp_Linux.zip s3://double-digit-devl/ --acl public-read"
                         sh "echo Finished create/update successfully!"
                     }
                 }
