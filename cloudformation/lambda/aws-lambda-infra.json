@@ -166,7 +166,7 @@
         "Environment": {
           "Variables": {
             "environment": {
-              "Ref": "Environment"
+              "Ref": "Env"
             }
           }
         }
