@@ -57,14 +57,16 @@ pipeline {
                 dir('cloudformation/access/lambda-role-policy/'){
                     script {
                         def apply = true
-                        def policyArn = sh(script: "aws iam list-policies --query 'Policies[?PolicyName==`${params.LAMBDAPOLICY}`].Arn' --output text", returnStdout: true)
+                        def policyArn = null
                         try {
                            policyArn = sh(script: "aws iam create-policy --policy-name ${params.LAMBDAPOLICY} \
                                 --policy-document file://aws-lambda-access-policy.json --query 'Arn' --output text", returnStdout: true)
                             apply = true
                         } catch(err){
                             apply = false
-                            sh "echo updating IAM Policy"
+                            sh "echo Policy already exist updating policy...."
+                            policyArn = sh(script: "aws iam list-policies --query 'Policies[?PolicyName==`${params.LAMBDAPOLICY}`].Arn' \
+                                        --output text", returnStdout: true)
                             sh "aws iam create-policy-version --policy-document file://aws-lambda-access-policy.json \
                                 --set-as-default --policy-arn $policyArn"
                         }
