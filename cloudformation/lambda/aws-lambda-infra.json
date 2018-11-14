@@ -133,20 +133,20 @@
             {
               "Ref": "LambdaSecurityGroup"
             }
+          ],
+          "SubnetIds": [
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${VPCStackName}-PrivateSubnetId-B"
+              }
+            },
+            {
+              "Fn::ImportValue": {
+                "Fn::Sub": "${VPCStackName}-PrivateSubnetId-A"
+              }
+            }
           ]
         },
-        "SubnetIds": [
-          {
-            "Fn::ImportValue": {
-              "Fn::Sub": "${VPCStackName}-PrivateSubnetId-B"
-            }
-          },
-          {
-            "Fn::ImportValue": {
-              "Fn::Sub": "${VPCStackName}-PrivateSubnetId-A"
-            }
-          }
-        ],
         "Tags": [
           {
             "Key": "Name",
