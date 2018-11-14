@@ -6,6 +6,10 @@
       "Description": "VPC to refer",
       "Type": "String"
     },
+    "S3StackName": {
+      "Description": "VPC to refer",
+      "Type": "String"
+    },
     "Env": {
       "Description": "Environment to which cft is created",
       "Type": "String",
@@ -23,24 +27,6 @@
     }
   },
   "Resources": {
-    "CodeBuildBucket": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "BucketName": {
-          "Fn::Join": [
-            "",
-            [
-              "double-digit-",
-              {
-                "Ref": "Env"
-              }
-            ]
-          ]
-        },
-        "AccessControl": "BucketOwnerFullControl"
-      },
-      "DeletionPolicy": "Delete"
-    },
     "DDSourceQueue": {
       "Type": "AWS::SQS::Queue",
       "DependsOn": [
@@ -128,7 +114,7 @@
         },
         "Code": {
           "S3Bucket": {
-            "Ref": "CodeBuildBucket"
+           "Fn::ImportValue" : {"Fn::Sub" : "${S3StackName}-S3Bucket"}
           },
           "S3Key": {
             "Ref": "S3Key"
