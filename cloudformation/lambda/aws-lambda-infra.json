@@ -121,7 +121,7 @@
           }
         },
         "Runtime": "java8",
-        "Timeout": 10,
+        "Timeout": 5,
         "MemorySize": 128,
         "VpcConfig": {
           "SecurityGroupIds": [
