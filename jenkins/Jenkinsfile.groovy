@@ -104,13 +104,14 @@ pipeline {
                                 sh 'echo Waiting for stack to delete....'
                                 sh "aws cloudformation --region ${params.REGION} wait stack-delete-complete --stack-name ${params.S3STACK}"
                                 sh 'echo Creating S3 bucket for code deployment after deleting....'
+                                apply = flase
                                 createS3Stack(region, stackName, vpc)
                             }
-                            apply = true
                         } catch(err){
-                            apply = false
-                            sh 'echo Creating S3 Bucket for first time....'
-                            createS3Stack(region, stackName, vpc)
+                            if(!apply){
+                                sh 'echo Creating S3 Bucket for first time....'
+                                createS3Stack(region, stackName, vpc)
+                            }
                         }
                         sh "aws s3 --region $region cp $WORKSPACE/SampleApp_Linux.zip s3://double-digit-devl/ --acl public-read"
                         sh "echo Finished create/update successfully!"
@@ -136,13 +137,14 @@ pipeline {
                                 sh 'echo Waiting for stack to delete....'
                                 sh "aws cloudformation --region ${params.REGION} wait stack-delete-complete --stack-name ${params.LAMBDASTACK}"
                                 sh 'echo Creating Lambda, S3, SQS for serverless computing after deleting....'
+                                apply = false
                                 createLambdaStack(region, stackName, vpc, s3)
                             }
-                            apply = true
                         } catch(err){
-                            apply = false
-                            sh 'echo Creating Lambda infra for serverless application for first time....'
-                            createLambdaStack(region, stackName, vpc, s3)
+                            if(apply){
+                                sh 'echo Creating Lambda infra for serverless application for first time....'
+                                createLambdaStack(region, stackName, vpc, s3)
+                            }
                         }
                         if(apply){
                             try {
