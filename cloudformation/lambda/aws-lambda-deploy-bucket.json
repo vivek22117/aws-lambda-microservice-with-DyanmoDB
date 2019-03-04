@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "AWS CloudFormation sample template that contains a single Lambda function behind an API Gateway",
+  "Description": "AWS CloudFormation sample template for S3 Bucket for code deploy",
   "Parameters": {
     "Env": {
       "Description": "Environment to which cft is created",
@@ -16,7 +16,7 @@
           "Fn::Join": [
             "",
             [
-              "double-digit-",
+              "double-digit-code-deploy-",
               {
                 "Ref": "Env"
               }

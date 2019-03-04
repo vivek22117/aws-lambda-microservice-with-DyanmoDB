@@ -76,8 +76,6 @@ pipeline {
                         } catch(err){
                             apply = false
                             sh "echo Policy already exist updating policy...."
-                            policyArn = sh(script: "aws iam list-policies --query 'Policies[?PolicyName==`${params.LAMBDAPOLICY}`].Arn' \
-                                        --output text", returnStdout: true)
                             sh "aws iam create-policy-version --policy-document file://aws-lambda-access-policy.json \
                                 --set-as-default --policy-arn $policyArn"
                         }
@@ -94,26 +92,23 @@ pipeline {
                         def apply = true
                         def status = null
                         def region = params.REGION
-                        def stackName = params.S3STACK
+                        def s3StackName = params.S3STACK
                         def vpc = params.VPCSTACK
                         try {
                             status = sh(script: "aws cloudformation describe-stacks --region ${params.REGION} \
                                 --stack-name ${params.S3STACK} --query Stacks[0].StackStatus --output text", returnStdout: true)
                             if (status == 'DELETE_FAILED' || 'ROLLBACK_COMPLETE' || 'ROLLBACK_FAILED' || 'UPDATE_ROLLBACK_FAILED') {
-                                sh "aws cloudformation delete-stack --stack-name ${params.S3STACK} --region ${params.REGION}"
-                                sh 'echo Waiting for stack to delete....'
-                                sh "aws cloudformation --region ${params.REGION} wait stack-delete-complete --stack-name ${params.S3STACK}"
-                                sh 'echo Creating S3 bucket for code deployment after deleting....'
+                                deleteS3Stack(region, s3StackName)
                                 apply = flase
-                                createS3Stack(region, stackName, vpc)
+                                createS3Stack(region, s3StackName, vpc)
                             }
                         } catch(err){
-                            if(!apply){
+                            if(apply){
                                 sh 'echo Creating S3 Bucket for first time....'
-                                createS3Stack(region, stackName, vpc)
+                                createS3Stack(region, s3StackName, vpc)
                             }
                         }
-                        sh "aws s3 --region $region cp $WORKSPACE/SampleApp_Linux.zip s3://double-digit-devl/ --acl public-read"
+                        sh "aws s3 --region $region cp $WORKSPACE/SampleApp_Linux.zip s3://double-digit-devl/"
                         sh "echo Finished create/update successfully!"
                     }
                 }
@@ -126,24 +121,23 @@ pipeline {
                         def apply = true
                         def status = null
                         def region = params.REGION
-                        def stackName = params.LAMBDASTACK
+                        def lambdaStackName = params.LAMBDASTACK
                         def vpc = params.VPCSTACK
                         def s3 = params.S3STACK
                         try {
                             status = sh(script: "aws cloudformation describe-stacks --region ${params.REGION} \
                                 --stack-name ${params.LAMBDASTACK} --query Stacks[0].StackStatus --output text", returnStdout: true)
                             if (status == 'DELETE_FAILED' || 'ROLLBACK_COMPLETE' || 'ROLLBACK_FAILED' || 'UPDATE_ROLLBACK_FAILED') {
-                                sh "aws cloudformation delete-stack --stack-name ${params.LAMBDASTACK} --region ${params.REGION}"
-                                sh 'echo Waiting for stack to delete....'
-                                sh "aws cloudformation --region ${params.REGION} wait stack-delete-complete --stack-name ${params.LAMBDASTACK}"
+                                deleteLambdaStack(region, lambdaStackName, vpc, s3)
                                 sh 'echo Creating Lambda, S3, SQS for serverless computing after deleting....'
+                                createLambdaStack(region, lambdaStackName, vpc, s3)
                                 apply = false
-                                createLambdaStack(region, stackName, vpc, s3)
                             }
                         } catch(err){
                             if(apply){
                                 sh 'echo Creating Lambda infra for serverless application for first time....'
-                                createLambdaStack(region, stackName, vpc, s3)
+                                createLambdaStack(region, lambdaStackName, vpc, s3)
+                                apply = false
                             }
                         }
                         if(apply){
@@ -162,4 +156,17 @@ pipeline {
             }
         }
     }
+}
+
+def deleteLambdaStack(String region, String lambdaStackName) {
+    sh "aws cloudformation delete-stack --stack-name ${lambdaStackName} --region ${region}"
+    sh 'echo Waiting for stack to delete....'
+    sh "aws cloudformation --region ${region} wait stack-delete-complete --stack-name ${lambdaStackName}"
+}
+
+def deleteS3Stack(String region, String s3StackName) {
+    sh "aws cloudformation delete-stack --stack-name ${s3StackName} --region ${region}"
+    sh 'echo Waiting for stack to delete....'
+    sh "aws cloudformation --region ${region} wait stack-delete-complete --stack-name ${s3StackName}"
+    sh 'echo Creating S3 bucket for code deployment after deleting....'
 }

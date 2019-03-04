@@ -50,7 +50,7 @@
     "LambdaSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "Enable acces from CPC Cidr",
+        "GroupDescription": "Enable acces from VPC Cidr",
         "VpcId": {
           "Fn::ImportValue": {
             "Fn::Sub": "${VPCStackName}-VPCId"
@@ -59,7 +59,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "lambda-sg"
+            "Value": "dd-lambda-sg"
           },
           {
             "Key": "component",
@@ -94,8 +94,7 @@
       "DependsOn": [
         "DDSourceQueue",
         "DDDeadLetterQueue",
-        "LambdaSecurityGroup",
-        "CodeBuildBucket"
+        "LambdaSecurityGroup"
       ],
       "Properties": {
         "FunctionName": "double-digit-lambda",
@@ -114,7 +113,9 @@
         },
         "Code": {
           "S3Bucket": {
-           "Fn::ImportValue" : {"Fn::Sub" : "${S3StackName}-S3Bucket"}
+            "Fn::ImportValue": {
+              "Fn::Sub": "${S3StackName}-S3Bucket"
+            }
           },
           "S3Key": {
             "Ref": "S3Key"
@@ -145,7 +146,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "dd-lambda"
+            "Value": "dd-lambda-SQS"
           },
           {
             "Key": "billing",
