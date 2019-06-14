@@ -1,7 +1,5 @@
 package com.vivek.tsr.domain;
 
-import jdk.nashorn.internal.ir.IdentNode;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -11,17 +9,24 @@ public class UserRequest {
     private String endTime;
     private String contentType;
     private Integer startIndex;
-    private Long employeeId;
-    private Long companyId;
-
+    private Integer rsvp_id;
+    private Long timeStamp;
     private boolean isLastReporting;
 
-    public Long getCompanyId() {
-        return companyId;
+    public Integer getRsvp_id() {
+        return rsvp_id;
     }
 
-    public void setCompanyId(Long companyId) {
-        this.companyId = companyId;
+    public void setRsvp_id(Integer rsvp_id) {
+        this.rsvp_id = rsvp_id;
+    }
+
+    public Long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(Long timeStamp) {
+        this.timeStamp = timeStamp;
     }
 
     public boolean isLastReporting() {
@@ -72,33 +77,22 @@ public class UserRequest {
         this.startIndex = startIndex;
     }
 
-    public Long getEmployeeId() {
-        return employeeId;
-    }
-
-    public void setEmployeeId(Long employeeId) {
-        this.employeeId = employeeId;
-    }
-
     public void initialize() {
         if (isLastReporting) {
             count = 1;
         }
-        if (count == 0 && count != null) {
+        if (count == 0) {
             count = 50;
         }
         if (startIndex == null) {
             startIndex = 0;
         }
         if (endTime == null) {
+            Instant.now().toString();
         }
         if (startTime == null) {
             startTime = Instant.parse(endTime).minus(100, ChronoUnit.MINUTES).toString();
         }
-
-    }
-
-    public static void init(String lastTime) {
 
     }
 }

@@ -6,8 +6,8 @@ import com.vivek.tsr.domain.UserRequest;
 import com.vivek.tsr.exception.ApplicationException;
 import com.vivek.tsr.service.RequestResponse;
 import com.vivek.tsr.utility.ValidateRequest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.vivek.tsr.utility.AppUtil.convert;
 import static com.vivek.tsr.utility.AppUtil.isValidContentType;
@@ -19,7 +19,7 @@ public class APIHandler {
     private RequestResponse requestResponse;
     private ValidateRequest validateRequest;
 
-    private static final Logger LOGGER = LogManager.getLogger(APIHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(APIHandler.class);
 
     public APIHandler() {
         this(new RequestResponse(), new ValidateRequest());
@@ -31,11 +31,11 @@ public class APIHandler {
     }
 
     public void processRequest(UserRequest userRequest) {
-        LOGGER.error("Process request has terminalId: ", userRequest.getEmployeeId());
+        LOGGER.error("Process request has terminalId: {} ", userRequest.getEmployeeId());
         try {
             if (validateRequest.validateRequest(userRequest)) {
                 if (isValidContentType(userRequest)) {
-                    new MyResponse(convert(userRequest.getContentType(), requestResponse.getDsrResponse(userRequest)),
+                    new MyResponse(convert(userRequest.getContentType(), requestResponse.gerRSVPResponse(userRequest)),
                             userRequest.getContentType());
                 }
                 throw new ApplicationException("Content type is not valid: ", null);

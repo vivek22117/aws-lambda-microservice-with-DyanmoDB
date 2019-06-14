@@ -1,5 +1,6 @@
 package com.vivek.tsr.service;
 
+import com.vivek.tsr.db.DynamoDBOperation;
 import com.vivek.tsr.domain.UserRequest;
 import com.vivek.tsr.utility.AppUtil;
 
@@ -13,8 +14,8 @@ public interface GPILastDataService {
 
     default List<String> getLastReportedDateFromDDB(UserRequest userRequest, DynamoDBOperation dbOperation) {
         if (!isNullOrEmpty(userRequest.getStartTime()) && !isNullOrEmpty(userRequest.getEndTime())) {
-            dbOperation.getByTerminalAndOrgId(userRequest.getEmployeeId(), userRequest.getCompanyId(),
-                    AppUtil.getTimeStampToDate(userRequest.getStartTime()), AppUtil.getTimeStampToDate(userRequest.getEndTime()), 1);
+            dbOperation.getByRsvpIdAndTimeIntervals(userRequest.getRsvp_id(), AppUtil.getTimeStampToDate(userRequest.getStartTime()),
+                    AppUtil.getTimeStampToDate(userRequest.getEndTime()));
         }
 
         return null;

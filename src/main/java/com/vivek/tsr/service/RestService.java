@@ -1,7 +1,7 @@
 package com.vivek.tsr.service;
 
 import com.amazonaws.util.CollectionUtils;
-import com.vivek.tsr.domain.EmployeeRecord;
+import com.vivek.tsr.domain.RSVPEventRecord;
 import com.vivek.tsr.domain.UserRequest;
 import com.vivek.tsr.utility.JsonUtility;
 import com.vivek.tsr.utility.PropertyLoader;
@@ -44,10 +44,10 @@ public class RestService {
     }
 
 
-    public List<EmployeeRecord> getModelApiRecords(UserRequest userRequest, List<String> timeIntervalsInString) throws ExecutionException, InterruptedException {
+    public List<RSVPEventRecord> getModelApiRecords(UserRequest userRequest, List<String> timeIntervalsInString) throws ExecutionException, InterruptedException {
 
 //        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
-        List<EmployeeRecord> allEmployeeRecords = new ArrayList<>();
+        List<RSVPEventRecord> allRSVPEventRecords = new ArrayList<>();
         ForkJoinPool pool = new ForkJoinPool(4);
 
         pool.submit(() -> timeIntervalsInString.parallelStream().map(interval -> {
@@ -57,20 +57,20 @@ public class RestService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return new ArrayList<EmployeeRecord>();
+            return new ArrayList<RSVPEventRecord>();
         }).flatMap(List::stream).collect(toList())).get();
 
        /* pool.submit(()->timeIntervals.parallelStream().forEach(interval ->{
             try {
-                allEmployeeRecords.addAll(getModelApiRecordFromMyModelService(userRequest.getTerminalId(),userRequest.getOrgId()
+                allRSVPEventRecords.addAll(getModelApiRecordFromMyModelService(userRequest.getTerminalId(),userRequest.getOrgId()
                         ,setStartTime(interval,userRequest),setEndTIme(interval,userRequest)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         })).get();*/
-      /*  List<Future<List<EmployeeRecord>>> collect1 = myCompanies.parallelStream().map(myCompany -> executorService.submit(new Callable<List<EmployeeRecord>>() {
+      /*  List<Future<List<RSVPEventRecord>>> collect1 = myCompanies.parallelStream().map(myCompany -> executorService.submit(new Callable<List<RSVPEventRecord>>() {
             @Override
-            public List<EmployeeRecord> call() throws Exception {
+            public List<RSVPEventRecord> call() throws Exception {
                 return getModelApiRecordFromMyModelService(userRequest.getTerminalId(), myCompany.getMyOrgId(),
                         userRequest.getStartTime(), userRequest.getEndTime());
             }
@@ -80,11 +80,11 @@ public class RestService {
 //        timeIntervals.stream().map()
 
 
-       /* List<EmployeeRecord> collect1 = timeIntervals.parallelStream().map(t1 -> {
+       /* List<RSVPEventRecord> collect1 = timeIntervals.parallelStream().map(t1 -> {
             try {
-                return executorService.submit(new Callable<List<EmployeeRecord>>() {
+                return executorService.submit(new Callable<List<RSVPEventRecord>>() {
                     @Override
-                    public List<EmployeeRecord> call() throws Exception {
+                    public List<RSVPEventRecord> call() throws Exception {
                         userRequest.initialize(t1);
                         return getModelApiRecordFromMyModelService(userRequest.getTerminalId(), userRequest.getOrgId(),
                                 userRequest.getStartTime(), userRequest.getEndTime());
@@ -93,7 +93,7 @@ public class RestService {
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
-            return new ArrayList<EmployeeRecord>();
+            return new ArrayList<RSVPEventRecord>();
         }).flatMap(List::stream).collect(toList());*/
 
 //                .stream().map(Future::get);
@@ -103,31 +103,31 @@ public class RestService {
                         getModelApiRecordFromMyModelService(userRequest.getTerminalId(), userRequest.getOrgId(),
                                 userRequest.getStartTime(), userRequest.getEndTime()))).collect(Collectors.toList());
 */
-       /* List<Future<List<EmployeeRecord>>> futureList = myCompanies.parallelStream()
+       /* List<Future<List<RSVPEventRecord>>> futureList = myCompanies.parallelStream()
                 .filter(myCompany -> myCompany.isActive())
                 .map(myCompany -> executorService.submit(() ->
                         getModelApiRecordFromMyModelService(userRequest.getTerminalId(), myCompany.getMyOrgId(),
                                 userRequest.getStartTime(), userRequest.getEndTime()))).collect(Collectors.toList());
 */
 
-      /*  List<EmployeeRecord> collectedGpiRecords = futureList.parallelStream().map(listFuture -> {
+      /*  List<RSVPEventRecord> collectedGpiRecords = futureList.parallelStream().map(listFuture -> {
             try {
                 return listFuture.get();
             } catch (InterruptedException | ExecutionException ex) {
                 logger.error("Unable to get gpiRecords for future list: ", ex);
             }
-            return new ArrayList<EmployeeRecord>();
+            return new ArrayList<RSVPEventRecord>();
         }).flatMap(List::stream).collect(Collectors.toList());*/
 
-        if (CollectionUtils.isNullOrEmpty(allEmployeeRecords)) {
+        if (CollectionUtils.isNullOrEmpty(allRSVPEventRecords)) {
             return null;
         }
         pool.shutdown();
-        sort(allEmployeeRecords, Comparator.comparing(EmployeeRecord::getEventTime));
-        return allEmployeeRecords;
+        sort(allRSVPEventRecords, Comparator.comparing(RSVPEventRecord::getEventTime));
+        return allRSVPEventRecords;
     }
 
-    /*private Function<String, List<EmployeeRecord>> fetchModelApiRecords(String interval, UserRequest tsrRequest) throws IOException {
+    /*private Function<String, List<RSVPEventRecord>> fetchModelApiRecords(String interval, UserRequest tsrRequest) throws IOException {
         return interval -> {
             getModelApiRecordFromMyModelService(tsrRequest.getTerminalId(),tsrRequest.getOrgId(),
                     setStartTime(interval,tsrRequest),setEndTIme(interval,tsrRequest));
@@ -154,16 +154,16 @@ public class RestService {
         return userRequest.getStartTime();
     }
 
-    private List<EmployeeRecord> getModelApiRecordFromMyModelService(Long terminalId, String startTime, String endTime) throws IOException {
-        List<EmployeeRecord> modelEmployeeRecord = new ArrayList<>();
+    private List<RSVPEventRecord> getModelApiRecordFromMyModelService(Long terminalId, String startTime, String endTime) throws IOException {
+        List<RSVPEventRecord> modelRSVPEventRecord = new ArrayList<>();
         String url = buildMyModelServiceURLForTerminalData(terminalId, startTime, endTime);
 
         System.out.println(url);
         ResponseEntity<String> forEntity = restTemplate.getForEntity(url, String.class);
-        EmployeeRecord employeeRecord = new JsonUtility().converCollectionFromJson(forEntity.getBody(), EmployeeRecord.class);
-        modelEmployeeRecord.add(employeeRecord);
+        RSVPEventRecord RSVPEventRecord = new JsonUtility().converCollectionFromJson(forEntity.getBody(), RSVPEventRecord.class);
+        modelRSVPEventRecord.add(RSVPEventRecord);
 
-        return modelEmployeeRecord;
+        return modelRSVPEventRecord;
     }
 
     private String buildMyModelServiceURLForTerminalData(Long terminalId, String startTime, String endTime) {

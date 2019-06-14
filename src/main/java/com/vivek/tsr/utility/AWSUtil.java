@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class AWSUtil {
     private static final Logger LOGGER = LogManager.getLogger(AWSUtil.class);
+
     private static AWSCredentialsProvider awsCredentialsProvider;
 
     public AmazonSQS getSQSClient(){

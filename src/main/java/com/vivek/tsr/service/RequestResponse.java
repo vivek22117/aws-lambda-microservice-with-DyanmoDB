@@ -10,21 +10,22 @@ import static com.amazonaws.util.StringUtils.isNullOrEmpty;
 public class RequestResponse {
 
     private HistoricalDataService historicalDataService;
-    private TsrLastDataService tsrLastDataService;
+    private RSVPLastReportedRecord rsvpLastReportedRecord;
 
     public RequestResponse() {
     }
 
-    public RequestResponse(HistoricalDataService historicalDataService, TsrLastDataService tsrLastDataService) {
+    public RequestResponse(HistoricalDataService historicalDataService,
+                           RSVPLastReportedRecord rsvpLastReportedRecord) {
         this.historicalDataService = historicalDataService;
-        this.tsrLastDataService = tsrLastDataService;
+        this.rsvpLastReportedRecord = rsvpLastReportedRecord;
     }
 
-    public RequestResponse getDsrResponse(UserRequest userRequest) {
+    public RequestResponse gerRSVPResponse(UserRequest userRequest) {
         if(userRequest.isLastReporting()){
-            return tsrLastDataService.getLastKnowGpiRecord(userRequest);
+            return rsvpLastReportedRecord.getLastKnowRSVPRecord(userRequest);
         } if(isNullOrEmpty(userRequest.getStartTime()) && isNullOrEmpty(userRequest.getEndTime())){
-            return historicalDataService.getHistoricGpiRecordsFor24Hours(userRequest);
+            return historicalDataService.getHistoricRSVPRecords(userRequest);
         }
 
         return null;

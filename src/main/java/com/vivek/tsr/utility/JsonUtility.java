@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.vivek.tsr.domain.EmployeeRecord;
+import com.vivek.tsr.domain.RSVPEventRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,7 +50,7 @@ public class JsonUtility {
         ObjectMapper objectMapper = new ObjectMapper();
         TypeFactory typeFactory = objectMapper.getTypeFactory();
         try {
-            return objectMapper.readValue(json, typeFactory.constructCollectionType(List.class, EmployeeRecord.class));
+            return objectMapper.readValue(json, typeFactory.constructCollectionType(List.class, RSVPEventRecord.class));
         } catch (IOException e) {
             logger.error("Unable to conver json string to list of object: ", e);
         }

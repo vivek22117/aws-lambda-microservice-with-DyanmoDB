@@ -94,7 +94,7 @@ public class ModelServiceTest {
                 .thenReturn(new ResponseEntity<String>(HttpStatus.OK))
                 .thenReturn(new ResponseEntity<String>(HttpStatus.OK));
 
-        List<EmployeeRecord> modelApiRecords = modelService.getModelApiRecords(tsrRequest, timeIntervals);
+        List<RSVPEventRecord> modelApiRecords = modelService.getModelApiRecords(tsrRequest, timeIntervals);
 
         Assert.assertThat(modelApiRecords.size(),is(""));
     }

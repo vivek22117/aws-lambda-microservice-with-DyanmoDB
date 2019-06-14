@@ -1,6 +1,7 @@
 package com.vivek.tsr.service;
 
-import com.vivek.tsr.domain.EmployeeRecord;
+import com.vivek.tsr.db.DynamoDBOperation;
+import com.vivek.tsr.domain.RSVPEventRecord;
 import com.vivek.tsr.domain.MyCompany;
 import com.vivek.tsr.domain.UserRequest;
 
@@ -24,37 +25,25 @@ import static java.util.stream.Collectors.*;
 public class HistoricalDataService {
     private static final String TIME_INTERVAL = "timeIntervalInMinutes";
     private static final long DEFAULT_TIME = 5;
+
     private RestService restService;
+    private DynamoDBOperation dbOperation;
 
-    private static List<String> reportedDateTimeIntervals1 = Arrays.asList("2018-04-01T02:01:30.610Z", "2018-04-01T10:01:30.610Z");
-    private static List<String> reportedDateTimeIntervals2 = Arrays.asList("2018-03-30T12:25:30.514Z", "2018-03-30T09:25:30.505Z", "2018-03-30T23:25:30.420Z", "2018-03-30T07:25:30.514Z", "2018-03-30T13:25:30.505Z", "2018-03-30T20:25:30.420Z");
-    private static List<String> reportedDateTimeIntervals3 = Arrays.asList("2018-03-28T17:25:30.415Z", "2018-03-28T15:25:30.561Z", "2018-03-28T20:25:30.500Z");
-    private static List<String> reportedDateTimeIntervals4 = Arrays.asList("2018-03-25T09:25:30.120Z", "2018-03-25T11:25:30.111Z", "2018-03-25T23:25:30.111Z");
-    private static List<String> reportedDateTimeIntervals5 = Arrays.asList("2018-03-24T07:25:30.012Z", "2018-03-24T13:25:30.222Z", "2018-03-24T10:25:30.215Z", "2018-03-24T15:25:30.222Z", "2018-03-24T17:25:30.215Z");
-    private static List<String> reportedDateTimeIntervals6 = Arrays.asList("2018-03-22T11:25:30.610Z", "2018-03-22T22:25:30.333Z", "2018-03-22T23:25:30.351Z");
-    private static List<String> reportedDateTimeIntervals7 = Arrays.asList("2018-03-21T05:25:30.610Z", "2018-03-21T22:25:30.333Z", "2018-03-21T15:25:30.351Z");
-    private static List<String> reportedDateTimeIntervals8 = Arrays.asList("2018-03-20T05:25:30.610Z", "2018-03-20T22:25:30.333Z", "2018-03-20T15:25:30.351Z");
-    private static List<String> reportedDateTimeIntervals9 = Arrays.asList("2018-03-19T05:25:30.610Z", "2018-03-19T22:25:30.333Z", "2018-03-19T15:25:30.351Z");
-
-
-    public HistoricalDataService(RestService restService) {
+    public HistoricalDataService(RestService restService, DynamoDBOperation dbOperation) {
         this.restService = restService;
+        this.dbOperation = dbOperation;
     }
 
-    public List<EmployeeRecord> getHistoricGpiRecords(UserRequest userRequest) throws ExecutionException, InterruptedException {
-        List<EmployeeRecord> allEmployeeRecords = new ArrayList<>();
-        EmployeeRecord employeeRecord = new EmployeeRecord();
+    public List<RSVPEventRecord> getHistoricGpiRecords(UserRequest userRequest) throws ExecutionException, InterruptedException {
+        List<RSVPEventRecord> allRSVPEventRecords = new ArrayList<>();
+        RSVPEventRecord RSVPEventRecord;
         userRequest.initialize();
+
+        dbOperation.getByRsvpIdAndTimeIntervals(userRequest.getRsvp_id(), userRequest.getTimeStamp(),
+                userRequest.getStartTime(), userRequest.getEndTime());
+
         List<List<String>> timeStampListForDates = new ArrayList<List<String>>();
         timeStampListForDates.add(reportedDateTimeIntervals1);
-        timeStampListForDates.add(reportedDateTimeIntervals2);
-        timeStampListForDates.add(reportedDateTimeIntervals3);
-        timeStampListForDates.add(reportedDateTimeIntervals4);
-        timeStampListForDates.add(reportedDateTimeIntervals5);
-        timeStampListForDates.add(reportedDateTimeIntervals6);
-        timeStampListForDates.add(reportedDateTimeIntervals7);
-        timeStampListForDates.add(reportedDateTimeIntervals8);
-        timeStampListForDates.add(reportedDateTimeIntervals9);
 
         List<String> actualTimeInterval = new ArrayList<>();
 
@@ -77,22 +66,22 @@ public class HistoricalDataService {
         do {
            /* List<String> timeIntervals = reportedDates.stream().map(data -> getFormattedDate(data)).map(d1 -> getNumberOfIntervals(d1))
                     .flatMap(x -> x.stream()).collect(toList());*/
-            List<EmployeeRecord> modelApiRecords = restService.getModelApiRecords(userRequest, actualTimeInterval);
-            allEmployeeRecords.addAll(modelApiRecords);
-            shortFall = getShortFall(userRequest, allEmployeeRecords);
+            List<RSVPEventRecord> modelApiRecords = restService.getModelApiRecords(userRequest, actualTimeInterval);
+            allRSVPEventRecords.addAll(modelApiRecords);
+            shortFall = getShortFall(userRequest, allRSVPEventRecords);
             if (shortFall == 0) {
-                List<EmployeeRecord> employeeRecordList = allEmployeeRecords.stream().skip(userRequest.getStartIndex())
+                List<RSVPEventRecord> RSVPEventRecordList = allRSVPEventRecords.stream().skip(userRequest.getStartIndex())
                         .limit(userRequest.getCount()).collect(toList());
                 userRequest.setStartIndex(0);
                 updateTime(userRequest);
                 break;
             } else if (shortFall < 0) {
-                List<EmployeeRecord> employeeRecordList = allEmployeeRecords.stream().skip(userRequest.getStartIndex())
+                List<RSVPEventRecord> RSVPEventRecordList = allRSVPEventRecords.stream().skip(userRequest.getStartIndex())
                         .limit(userRequest.getCount()).collect(toList());
                 updateStartingIndex(userRequest, shortFall, modelApiRecords);
                 //60 + (-50) + 1 =11
             } /*else if (Instant.parse(userRequest.getStartTime()).isBefore(Instant.parse(userRequest.getThreshold()))) {
-                List<EmployeeRecord> gpiRecordList = allEmployeeRecords.stream().skip(userRequest.getStartIndex())
+                List<RSVPEventRecord> gpiRecordList = allRSVPEventRecords.stream().skip(userRequest.getStartIndex())
                         .limit(userRequest.getCount()).collect(toList());
                 updateStartingIndex(userRequest, shortFall, modelApiRecords);
                 updateTime(userRequest);
@@ -113,14 +102,14 @@ public class HistoricalDataService {
     }
 
 
-    private void updateStartingIndex(UserRequest userRequest, int shortFall, List<EmployeeRecord> modelApiRecords) {
+    private void updateStartingIndex(UserRequest userRequest, int shortFall, List<RSVPEventRecord> modelApiRecords) {
         if (modelApiRecords.size() > userRequest.getCount()) {
             userRequest.setStartIndex(modelApiRecords.size() + (shortFall - 1));
         }
     }
 
-    private int getShortFall(UserRequest userRequest, List<EmployeeRecord> allEmployeeRecords) {
-        return userRequest.getCount() - (allEmployeeRecords.size() - (userRequest.getStartIndex() - 1));
+    private int getShortFall(UserRequest userRequest, List<RSVPEventRecord> allRSVPEventRecords) {
+        return userRequest.getCount() - (allRSVPEventRecords.size() - (userRequest.getStartIndex() - 1));
     }
 
     private void updateTime(UserRequest userRequest) {
@@ -147,50 +136,8 @@ public class HistoricalDataService {
         return myCompany;
     }
 
-    public RequestResponse getHistoricGpiRecordsFor24Hours(UserRequest userRequest) {
+    public RequestResponse getHistoricRSVPRecords(UserRequest userRequest) {
         return null;
     }
 
-    public static void main(String[] args) {
-
-//        List<String> timeList = Arrays.asList("2018-03-30T12:25:30.514Z", "2018-03-30T23:25:30.505Z", "2018-03-30T23:25:30.420Z", "2018-03-30T07:25:30.514Z", "2018-03-30T13:25:30.505Z", "2018-03-30T20:25:30.420Z");
-
-        UserRequest userRequest = new UserRequest();
-        userRequest.setStartTime("2018-03-19T23:00:05.105Z");
-        userRequest.setEndTime("2018-04-01T07:05:05.105Z");
-        userRequest.setEmployeeId(5055L);
-        userRequest.setContentType("application/json");
-
-        /*List<String> strings = sortedTimeIntervalofDate(timeList, userRequest);
-        System.out.println(strings);*/
-
-
-        List<List<String>> timeStampListForDates = new ArrayList<List<String>>();
-        timeStampListForDates.add(reportedDateTimeIntervals1);
-        timeStampListForDates.add(reportedDateTimeIntervals2);
-        timeStampListForDates.add(reportedDateTimeIntervals3);
-        timeStampListForDates.add(reportedDateTimeIntervals4);
-        timeStampListForDates.add(reportedDateTimeIntervals5);
-        timeStampListForDates.add(reportedDateTimeIntervals6);
-        timeStampListForDates.add(reportedDateTimeIntervals7);
-        timeStampListForDates.add(reportedDateTimeIntervals8);
-        timeStampListForDates.add(reportedDateTimeIntervals9);
-
-        List<String> actualTimeInterval = new ArrayList<>();
-
-        timeStampListForDates.stream()
-                .forEach(timeList -> {
-                    List<String> sortedFilteredTimeIntervals = sortedTimeIntervalofDate(timeList, userRequest);
-                    if (sortedFilteredTimeIntervals.size() >= 1) {
-                        if (between(parse(sortedFilteredTimeIntervals.get(sortedFilteredTimeIntervals.size() - 1)), parse(sortedFilteredTimeIntervals.get(0))).getSeconds() > 43200) {
-                            actualTimeInterval.add(sortedFilteredTimeIntervals.get(0) + "=" + valueOf(Instant.parse(sortedFilteredTimeIntervals.get(0)).minus(720, MINUTES)));
-                            actualTimeInterval.add(valueOf(Instant.parse(sortedFilteredTimeIntervals.get(0)).minus(43201, ChronoUnit.SECONDS)) + "=" + sortedFilteredTimeIntervals.get(sortedFilteredTimeIntervals.size() - 1));
-                        } else {
-                            actualTimeInterval.add(sortedFilteredTimeIntervals.get(0) + "=" + sortedFilteredTimeIntervals.get(sortedFilteredTimeIntervals.size() - 1));
-                        }
-                    }
-                });
-
-        System.out.println(actualTimeInterval);
-    }
 }
