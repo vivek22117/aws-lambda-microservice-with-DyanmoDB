@@ -10,8 +10,26 @@ public class UserRequest {
     private String contentType;
     private Integer startIndex;
     private Integer rsvp_id;
+    private String event_id;
+    private String venue_id;
     private Long timeStamp;
     private boolean isLastReporting;
+
+    public String getEvent_id() {
+        return event_id;
+    }
+
+    public void setEvent_id(String event_id) {
+        this.event_id = event_id;
+    }
+
+    public String getVenue_id() {
+        return venue_id;
+    }
+
+    public void setVenue_id(String venue_id) {
+        this.venue_id = venue_id;
+    }
 
     public Integer getRsvp_id() {
         return rsvp_id;

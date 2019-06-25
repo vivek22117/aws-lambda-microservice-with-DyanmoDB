@@ -9,20 +9,23 @@ import java.util.List;
 @DynamoDBTable(tableName = "RSVPEventTable")
 public class LatestRSVPRecord {
 
-    @DynamoDBHashKey(attributeName = "rsvpId")
+    @DynamoDBHashKey(attributeName = "rsvp_Id")
     private String rsvpId;
 
-    @DynamoDBAttribute(attributeName = "rsvpMakeTime")
+    @DynamoDBAttribute(attributeName = "rsvp_makeTime")
     private String rsvpMakeTime;
 
-    @DynamoDBRangeKey(attributeName = "createdDate")
+    @DynamoDBRangeKey(attributeName = "created_date")
     private String createdDate;
 
-    @DynamoDBAttribute(attributeName = "rsvpRecord")
-    private RSVPEventRecord rsvpEventRecord;
+    @DynamoDBAttribute(attributeName = "rsvp_record")
+    private String rsvpEventRecord;
 
-    @DynamoDBAttribute(attributeName = "event")
-    private Event rsvpEvent;
+    @DynamoDBAttribute(attributeName = "rsvp_event_id")
+    private String rsvpEventId;
+
+    @DynamoDBAttribute(attributeName = "rsvp_venue_id")
+    private String rsvpVenueId;
 
 
     public String getRsvpId() {
@@ -49,19 +52,27 @@ public class LatestRSVPRecord {
         this.createdDate = createdDate;
     }
 
-    public RSVPEventRecord getRsvpEventRecord() {
+    public String getRsvpEventRecord() {
         return rsvpEventRecord;
     }
 
-    public void setRsvpEventRecord(RSVPEventRecord rsvpEventRecord) {
+    public void setRsvpEventRecord(String rsvpEventRecord) {
         this.rsvpEventRecord = rsvpEventRecord;
     }
 
-    public Event getRsvpEvent() {
-        return rsvpEvent;
+    public String getRsvpEventId() {
+        return rsvpEventId;
     }
 
-    public void setRsvpEvent(Event rsvpEvent) {
-        this.rsvpEvent = rsvpEvent;
+    public void setRsvpEventId(String rsvpEventId) {
+        this.rsvpEventId = rsvpEventId;
+    }
+
+    public String getRsvpVenueId() {
+        return rsvpVenueId;
+    }
+
+    public void setRsvpVenueId(String rsvpVenueId) {
+        this.rsvpVenueId = rsvpVenueId;
     }
 }

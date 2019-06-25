@@ -6,26 +6,25 @@ import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
-import org.apache.commons.logging.LogFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Vivek Kumar Mishra on 11/11/2018.
  */
 public class AWSUtil {
-    private static final Logger LOGGER = LogManager.getLogger(AWSUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AWSUtil.class);
 
     private static AWSCredentialsProvider awsCredentialsProvider;
 
-    public AmazonSQS getSQSClient(){
-        try{
+    public AmazonSQS getSQSClient() {
+        try {
             AWSCredentialsProvider awsCredentials = getAWSCredentials();
             return AmazonSQSClientBuilder.standard()
                     .withCredentials(awsCredentials)
                     .withRegion(Regions.US_EAST_1)
                     .build();
-        } catch (Exception ex){
+        } catch (Exception ex) {
             LOGGER.error("Exception occured.." + ex.getMessage());
             throw ex;
         }

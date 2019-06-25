@@ -19,17 +19,14 @@ public class KinesisProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(KinesisProcessor.class);
 
     private JsonUtility jsonUtility;
-    private DomainService domainService;
     private DDBPersistenceService ddbPersistenceService;
 
     public KinesisProcessor() {
-        this(new JsonUtility(), new DomainService(), new DDBPersistenceService());
+        this(new JsonUtility(), new DDBPersistenceService());
     }
 
-    private KinesisProcessor(JsonUtility jsonUtility, DomainService domainService,
-                             DDBPersistenceService ddbPersistenceService) {
+    private KinesisProcessor(JsonUtility jsonUtility, DDBPersistenceService ddbPersistenceService) {
         this.jsonUtility = jsonUtility;
-        this.domainService = domainService;
         this.ddbPersistenceService = ddbPersistenceService;
     }
 

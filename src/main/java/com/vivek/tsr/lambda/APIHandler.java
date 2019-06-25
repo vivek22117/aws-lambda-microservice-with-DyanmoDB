@@ -31,7 +31,7 @@ public class APIHandler {
     }
 
     public void processRequest(UserRequest userRequest) {
-        LOGGER.error("Process request has terminalId: {} ", userRequest.getEmployeeId());
+        LOGGER.error("Process request has rsvpId: {} ", userRequest.getRsvp_id());
         try {
             if (validateRequest.validateRequest(userRequest)) {
                 if (isValidContentType(userRequest)) {

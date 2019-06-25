@@ -39,11 +39,10 @@ public class HistoricalDataService {
         RSVPEventRecord RSVPEventRecord;
         userRequest.initialize();
 
-        dbOperation.getByRsvpIdAndTimeIntervals(userRequest.getRsvp_id(), userRequest.getTimeStamp(),
-                userRequest.getStartTime(), userRequest.getEndTime());
+        List<String> reportedDateTimeIntervals = dbOperation.getEventByRSVPAndEventId(userRequest.getRsvp_id(), userRequest.getEvent_id(), 1);
 
         List<List<String>> timeStampListForDates = new ArrayList<List<String>>();
-        timeStampListForDates.add(reportedDateTimeIntervals1);
+        timeStampListForDates.add(reportedDateTimeIntervals);
 
         List<String> actualTimeInterval = new ArrayList<>();
 

@@ -2,8 +2,8 @@ package com.vivek.tsr.lambda;
 
 import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import com.vivek.tsr.utility.JsonUtility;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -13,7 +13,7 @@ import java.util.function.Consumer;
  */
 public class SQSProcessor {
 
-    private Logger logger = LogManager.getLogger(SQSProcessor.class);
+    private Logger logger = LoggerFactory.getLogger(SQSProcessor.class);
     private JsonUtility jsonUtility;
 
     public SQSProcessor() {

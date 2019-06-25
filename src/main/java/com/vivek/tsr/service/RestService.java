@@ -5,18 +5,22 @@ import com.vivek.tsr.domain.RSVPEventRecord;
 import com.vivek.tsr.domain.UserRequest;
 import com.vivek.tsr.utility.JsonUtility;
 import com.vivek.tsr.utility.PropertyLoader;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 
 import static java.time.Instant.parse;
 import static java.util.Collections.sort;
 import static java.util.stream.Collectors.toList;
-import static org.apache.logging.log4j.LogManager.getLogger;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Created by Vivek Kumar Mishra on 07-02-2018.
@@ -52,8 +56,8 @@ public class RestService {
 
         pool.submit(() -> timeIntervalsInString.parallelStream().map(interval -> {
             try {
-                return getModelApiRecordFromMyModelService(userRequest.getEmployeeId(),
-                        setStartTime(interval, userRequest), setEndTIme(interval, userRequest));
+                return getModelApiRecordFromMyModelService(userRequest.getRsvp_id(), setStartTime(interval, userRequest),
+                        setEndTIme(interval, userRequest));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -123,7 +127,7 @@ public class RestService {
             return null;
         }
         pool.shutdown();
-        sort(allRSVPEventRecords, Comparator.comparing(RSVPEventRecord::getEventTime));
+        sort(allRSVPEventRecords, Comparator.comparing(RSVPEventRecord::getMtime));
         return allRSVPEventRecords;
     }
 
@@ -154,9 +158,9 @@ public class RestService {
         return userRequest.getStartTime();
     }
 
-    private List<RSVPEventRecord> getModelApiRecordFromMyModelService(Long terminalId, String startTime, String endTime) throws IOException {
+    private List<RSVPEventRecord> getModelApiRecordFromMyModelService(Integer rsvpId, String startTime, String endTime) throws IOException {
         List<RSVPEventRecord> modelRSVPEventRecord = new ArrayList<>();
-        String url = buildMyModelServiceURLForTerminalData(terminalId, startTime, endTime);
+        String url = buildMyModelServiceURLForTerminalData(rsvpId, startTime, endTime);
 
         System.out.println(url);
         ResponseEntity<String> forEntity = restTemplate.getForEntity(url, String.class);
@@ -166,7 +170,7 @@ public class RestService {
         return modelRSVPEventRecord;
     }
 
-    private String buildMyModelServiceURLForTerminalData(Long terminalId, String startTime, String endTime) {
+    private String buildMyModelServiceURLForTerminalData(Integer terminalId, String startTime, String endTime) {
 
         return String.valueOf(new StringBuilder("http://my.vivek.com").append(MY_DATA_API).append(DATA_API)
                 .append("?").append("employeeId=").append(terminalId).append(DELIMITER)
@@ -182,7 +186,7 @@ public class RestService {
         UserRequest userRequest = new UserRequest();
         userRequest.setCount(100);
         userRequest.setStartIndex(0);
-        userRequest.setEmployeeId(5001L);
+        userRequest.setRsvp_id(5001);
         userRequest.setContentType("application/json");
         userRequest.setStartTime("2018-02-21T05:00:05.201Z");
         userRequest.setEndTime("2018-04-01T07:05:05.101Z");

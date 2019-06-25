@@ -14,8 +14,7 @@ public interface GPILastDataService {
 
     default List<String> getLastReportedDateFromDDB(UserRequest userRequest, DynamoDBOperation dbOperation) {
         if (!isNullOrEmpty(userRequest.getStartTime()) && !isNullOrEmpty(userRequest.getEndTime())) {
-            dbOperation.getByRsvpIdAndTimeIntervals(userRequest.getRsvp_id(), AppUtil.getTimeStampToDate(userRequest.getStartTime()),
-                    AppUtil.getTimeStampToDate(userRequest.getEndTime()));
+            dbOperation.getEventByRSVPAndEventId(userRequest.getRsvp_id(), userRequest.getEvent_id(), ddbLimit);
         }
 
         return null;
