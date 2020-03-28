@@ -1,45 +1,50 @@
 package com.vivek.tsr.utility;
 
-import com.vivek.tsr.domain.UserRequest;
+import com.amazonaws.util.StringUtils;
+import com.vivek.tsr.domain.RSVPRequest;
 
 import java.time.Instant;
 import java.util.Objects;
 
-import static com.amazonaws.util.StringUtils.*;
+import static com.amazonaws.util.StringUtils.isNullOrEmpty;
 
-/**
- * Created by Vivek Kumar Mishra on 20-03-2018.
- */
 public class ValidateRequest {
 
-    public boolean validateRequest(UserRequest userRequest){
-        if(userRequest.isLastReporting()){
-            return validateLastKnownRequestParameters(userRequest);
-        }
-
-        return (validateTimeInterval(userRequest) && validateCount(userRequest));
-    }
-
-    private boolean validateLastKnownRequestParameters(UserRequest userRequest) {
-        return (isNullOrEmpty(userRequest.getStartTime()) && isNullOrEmpty(userRequest.getEndTime())
-                && (Objects.isNull(userRequest.getCount())));
-    }
-
-    private boolean validateTimeInterval(UserRequest userRequest){
-        if(!isNullOrEmpty(userRequest.getStartTime()) && !isNullOrEmpty(userRequest.getEndTime())){
-            if(Instant.parse(userRequest.getStartTime()).isAfter(Instant.parse(userRequest.getEndTime()))){
-                return false;
+    public boolean validateRequest(RSVPRequest rsvpRequest) {
+        boolean requestIdValid = isRequestIdValid(rsvpRequest);
+        if (requestIdValid) {
+            if (rsvpRequest.isLastReporting()) {
+                return validateLastKnownRequestParameters(rsvpRequest);
             }
-            return true;
+            return (validateTimeInterval(rsvpRequest) && validateCount(rsvpRequest));
+        }
+        return false;
+    }
+
+    private boolean validateLastKnownRequestParameters(RSVPRequest rsvpRequest) {
+        return (isNullOrEmpty(rsvpRequest.getStartTime()) && isNullOrEmpty(rsvpRequest.getEndTime())
+                && (Objects.isNull(rsvpRequest.getCount())));
+    }
+
+    private boolean validateTimeInterval(RSVPRequest rsvpRequest) {
+        if (!isNullOrEmpty(rsvpRequest.getStartTime()) && !isNullOrEmpty(rsvpRequest.getEndTime())) {
+            return !Instant.parse(rsvpRequest.getStartTime()).isAfter(Instant.parse(rsvpRequest.getEndTime()));
         }
         return true;
     }
 
-    private boolean validateCount(UserRequest userRequest){
-        if(userRequest.getCount()<=0){
+    private boolean validateCount(RSVPRequest rsvpRequest) {
+        if (rsvpRequest.getCount() <= 0) {
             return false;
-        }else if(userRequest.getCount() > 250){
-            return false;
+        }
+        return rsvpRequest.getCount() <= 22;
+    }
+
+    private boolean isRequestIdValid(RSVPRequest rsvpRequest) {
+        if (rsvpRequest.getRsvp_id() == null) {
+            if (StringUtils.isNullOrEmpty(rsvpRequest.getEvent_id())) {
+                return !StringUtils.isNullOrEmpty(rsvpRequest.getVenue_id());
+            }
         }
         return true;
     }

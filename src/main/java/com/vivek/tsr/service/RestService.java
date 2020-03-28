@@ -2,7 +2,7 @@ package com.vivek.tsr.service;
 
 import com.amazonaws.util.CollectionUtils;
 import com.vivek.tsr.domain.RSVPEventRecord;
-import com.vivek.tsr.domain.UserRequest;
+import com.vivek.tsr.domain.RSVPRequest;
 import com.vivek.tsr.utility.JsonUtility;
 import com.vivek.tsr.utility.PropertyLoader;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class RestService {
     }
 
 
-    public List<RSVPEventRecord> getModelApiRecords(UserRequest userRequest, List<String> timeIntervalsInString) throws ExecutionException, InterruptedException {
+    public List<RSVPEventRecord> getModelApiRecords(RSVPRequest RSVPRequest, List<String> timeIntervalsInString) throws ExecutionException, InterruptedException {
 
 //        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
         List<RSVPEventRecord> allRSVPEventRecords = new ArrayList<>();
@@ -56,8 +56,8 @@ public class RestService {
 
         pool.submit(() -> timeIntervalsInString.parallelStream().map(interval -> {
             try {
-                return getModelApiRecordFromMyModelService(userRequest.getRsvp_id(), setStartTime(interval, userRequest),
-                        setEndTIme(interval, userRequest));
+                return getModelApiRecordFromMyModelService(RSVPRequest.getRsvp_id(), setStartTime(interval, RSVPRequest),
+                        setEndTIme(interval, RSVPRequest));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -138,24 +138,24 @@ public class RestService {
         }
     }*/
 
-    private String setEndTIme(String interval, UserRequest userRequest) {
+    private String setEndTIme(String interval, RSVPRequest RSVPRequest) {
         String[] splitedIntervals = interval.split("=");
         String endTime = splitedIntervals[0];
         System.out.println(endTime);
-        if (parse(userRequest.getEndTime()).isAfter(parse(endTime))) {
+        if (parse(RSVPRequest.getEndTime()).isAfter(parse(endTime))) {
             return endTime;
         }
-        return userRequest.getEndTime();
+        return RSVPRequest.getEndTime();
     }
 
-    private String setStartTime(String interval, UserRequest userRequest) {
+    private String setStartTime(String interval, RSVPRequest RSVPRequest) {
         String[] splitedTimeIntervals = interval.split("=");
         String startTime = splitedTimeIntervals[1];
         System.out.println(startTime);
-        if (parse(startTime).isAfter(parse(userRequest.getStartTime()))) {
+        if (parse(startTime).isAfter(parse(RSVPRequest.getStartTime()))) {
             return startTime;
         }
-        return userRequest.getStartTime();
+        return RSVPRequest.getStartTime();
     }
 
     private List<RSVPEventRecord> getModelApiRecordFromMyModelService(Integer rsvpId, String startTime, String endTime) throws IOException {
@@ -182,15 +182,15 @@ public class RestService {
         return PropertyLoader.getPropValues(MY_MODEL_API);
     }
 
-    private static UserRequest getTsrReqest() {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setCount(100);
-        userRequest.setStartIndex(0);
-        userRequest.setRsvp_id(5001);
-        userRequest.setContentType("application/json");
-        userRequest.setStartTime("2018-02-21T05:00:05.201Z");
-        userRequest.setEndTime("2018-04-01T07:05:05.101Z");
-        return userRequest;
+    private static RSVPRequest getTsrReqest() {
+        RSVPRequest RSVPRequest = new RSVPRequest();
+        RSVPRequest.setCount(100);
+        RSVPRequest.setStartIndex(0);
+        RSVPRequest.setRsvp_id(5001);
+        RSVPRequest.setContentType("application/json");
+        RSVPRequest.setStartTime("2018-02-21T05:00:05.201Z");
+        RSVPRequest.setEndTime("2018-04-01T07:05:05.101Z");
+        return RSVPRequest;
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
@@ -200,7 +200,7 @@ public class RestService {
                 "2018-03-28T20:25:30.500Z=2018-03-28T15:25:30.561Z", "2018-03-25T23:25:30.111Z=2018-03-25T11:25:30.111Z", "2018-03-25T11:25:29.111Z=2018-03-25T09:25:30.120Z",
                 "2018-03-24T17:25:30.215Z=2018-03-24T07:25:30.012Z", "2018-03-22T22:25:30.333Z=2018-03-22T10:25:30.333Z", "2018-03-22T10:25:29.333Z=2018-03-22T05:25:30.610Z",
                 "2018-03-21T22:25:30.333Z=2018-03-21T10:25:30.333Z", "2018-03-21T10:25:29.333Z=2018-03-21T05:25:30.610Z");
-        UserRequest userRequest = getTsrReqest();
-        restService.getModelApiRecords(userRequest, timeIntervals);
+        RSVPRequest RSVPRequest = getTsrReqest();
+        restService.getModelApiRecords(RSVPRequest, timeIntervals);
     }
 }

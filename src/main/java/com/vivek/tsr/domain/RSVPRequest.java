@@ -3,7 +3,7 @@ package com.vivek.tsr.domain;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-public class UserRequest {
+public class RSVPRequest {
     private Integer count;
     private String startTime;
     private String endTime;
@@ -100,7 +100,7 @@ public class UserRequest {
             count = 1;
         }
         if (count == 0) {
-            count = 50;
+            count = 22;
         }
         if (startIndex == null) {
             startIndex = 0;

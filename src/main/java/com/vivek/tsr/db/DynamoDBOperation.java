@@ -17,9 +17,6 @@ import java.util.*;
 import static java.util.Objects.isNull;
 import static java.util.stream.Collectors.toList;
 
-/**
- * Created by HARSHA on 20-02-2018.
- */
 public class DynamoDBOperation {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDBOperation.class);

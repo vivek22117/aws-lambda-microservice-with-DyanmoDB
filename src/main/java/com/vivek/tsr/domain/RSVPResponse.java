@@ -1,15 +1,13 @@
 package com.vivek.tsr.domain;
 
-/**
- * Created by Vivek Kumar Mishra on 20-03-2018.
- */
-public class MyResponse {
+
+public class RSVPResponse {
 
     private String contentType;
     private String content;
 
 
-    public MyResponse( String content, String contentType) {
+    public RSVPResponse(String content, String contentType) {
         this.contentType = contentType;
         this.content = content;
     }
